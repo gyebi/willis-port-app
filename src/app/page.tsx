@@ -1,69 +1,67 @@
-import Image from "next/image";
 import styles from "./page.module.css";
+import Link from "next/link"
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className={styles.page}>
+      <header className={styles.header}>
+        <div>
+          <p className={styles.eyebrow}>WILLIS PORT</p>
+          <h1>Operations Dashboard</h1>
+          <p className={styles.subtitle}>
+            Customer requests, invoices, payments and shipping operations.
           </p>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <Link
+          href="/requests/new"
+          className={styles.newRequestButton}
+        >
+          + New Request
+        </Link>
+      </header>
+
+      <section className={styles.stats}>
+        <article className={styles.card}>
+          <p>Requests Today</p>
+          <strong>0</strong>
+        </article>
+
+        <article className={styles.card}>
+          <p>Invoices Sent</p>
+          <strong>0</strong>
+        </article>
+
+        <article className={styles.card}>
+          <p>Awaiting Payment</p>
+          <strong>0</strong>
+        </article>
+
+        <article className={styles.card}>
+          <p>Paid</p>
+          <strong>0</strong>
+        </article>
+      </section>
+
+      <section className={styles.requests}>
+        <div className={styles.sectionHeader}>
+          <div>
+            <h2>Recent Requests</h2>
+            <p>Customer shipping requests will appear here.</p>
+          </div>
         </div>
-      </main>
-    </div>
+
+        <div className={styles.emptyState}>
+          <h3>No requests yet</h3>
+          <p>
+            Create the first customer request to begin processing a shipment.
+          </p>
+
+          <Link href="/requests/new" className={styles.emptyButton}>
+            Create Request
+          </Link>
+        </div>
+      </section>
+    </main>
   );
 }
