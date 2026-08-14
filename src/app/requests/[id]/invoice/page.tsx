@@ -67,8 +67,25 @@ export default async function InvoicePage({
         />
 
         <PricingSection
+          requestId={customerRequest.id}
           volumeCbm={customerRequest.volumeCbm?.toString() ?? null}
           weightKg={customerRequest.weightKg?.toString() ?? null}
+          initialPricingBasis={invoice.pricingBasis}
+          initialRateUsd={invoice.rateUsd.toString()}
+          initialHandlingChargeUsd={
+            invoice.handlingChargeUsd.toString()
+          }
+          initialDocumentationChargeUsd={
+            invoice.documentationChargeUsd.toString()
+          }
+          initialSpecialHandlingChargeUsd={
+            invoice.specialHandlingChargeUsd.toString()
+          }
+          initialDiscountUsd={invoice.discountUsd.toString()}
+          initialExchangeRate={invoice.exchangeRate.toString()}
+          initialValidUntil={
+            invoice.validUntil.toISOString().slice(0, 10)
+          }
         />
 
         <section className={styles.section}>

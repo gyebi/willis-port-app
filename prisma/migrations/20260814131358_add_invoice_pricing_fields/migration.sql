@@ -1,0 +1,13 @@
+-- CreateEnum
+CREATE TYPE "PricingBasis" AS ENUM ('CBM', 'WEIGHT', 'MANUAL');
+
+-- AlterTable
+ALTER TABLE "Invoice" ADD COLUMN     "discountUsd" DECIMAL(65,30) NOT NULL DEFAULT 0,
+ADD COLUMN     "documentationChargeUsd" DECIMAL(65,30) NOT NULL DEFAULT 0,
+ADD COLUMN     "handlingChargeUsd" DECIMAL(65,30) NOT NULL DEFAULT 0,
+ADD COLUMN     "pricingBasis" "PricingBasis" NOT NULL DEFAULT 'CBM',
+ADD COLUMN     "rateUsd" DECIMAL(65,30) NOT NULL DEFAULT 0,
+ADD COLUMN     "specialHandlingChargeUsd" DECIMAL(65,30) NOT NULL DEFAULT 0,
+ALTER COLUMN "exchangeRate" SET DEFAULT 1,
+ALTER COLUMN "subtotalUsd" SET DEFAULT 0,
+ALTER COLUMN "totalGhs" SET DEFAULT 0;

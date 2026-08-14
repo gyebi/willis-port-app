@@ -54,14 +54,27 @@ model Invoice {
 
   currency          String          @default("USD")
 
-  exchangeRate      Decimal
-  subtotalUsd       Decimal
-  totalGhs          Decimal
+  pricingBasis              PricingBasis @default(CBM)
+  rateUsd                   Decimal      @default(0)
+  handlingChargeUsd         Decimal      @default(0)
+  documentationChargeUsd    Decimal      @default(0)
+  specialHandlingChargeUsd  Decimal      @default(0)
+  discountUsd               Decimal      @default(0)
+
+  exchangeRate      Decimal         @default(1)
+  subtotalUsd       Decimal         @default(0)
+  totalGhs          Decimal         @default(0)
 
   validUntil        DateTime
 
-  status            InvoiceStatus    @default(DRAFT)
+  status            InvoiceStatus   @default(DRAFT)
 
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+enum PricingBasis {
+  CBM
+  WEIGHT
+  MANUAL
 }
