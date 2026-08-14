@@ -6,7 +6,7 @@
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -48,7 +48,6 @@
 }
 
 .status {
-  display: inline-block;
   padding: 8px 12px;
   border: 1px solid #dddddd;
   border-radius: 999px;
@@ -66,8 +65,11 @@
 }
 
 .section h2 {
-  margin-top: 0;
-  margin-bottom: 24px;
+  margin: 0 0 24px;
+}
+
+.sectionText {
+  color: #666666;
 }
 
 .grid {
@@ -89,10 +91,6 @@
   font-size: 13px;
 }
 
-.grid strong {
-  font-size: 16px;
-}
-
 .description {
   margin-top: 24px;
 }
@@ -102,29 +100,45 @@
   line-height: 1.6;
 }
 
-.emptyInvoiceState {
-  padding: 8px 0 20px;
-  color: #666666;
+.placeholder {
+  padding: 36px;
+  border: 1px dashed #cccccc;
+  border-radius: 8px;
+  color: #777777;
+  text-align: center;
 }
 
 .actions {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.invoiceButton {
-  border: none;
+.actions button {
+  padding: 12px 16px;
+  border: 1px solid #d4d4d4;
   border-radius: 8px;
-  padding: 14px 20px;
-  background: #f97316;
-  color: #ffffff;
-  font-size: 15px;
+  background: #ffffff;
+  color: #111111;
   font-weight: 700;
   cursor: pointer;
 }
 
-.invoiceButton:hover {
-  background: #d85f0b;
+.actions button:first-child {
+  border-color: #f97316;
+  background: #f97316;
+  color: #ffffff;
+}
+
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.warning {
+  margin-top: 16px;
+  color: #a34b00;
+  font-size: 14px;
 }
 
 @media (max-width: 700px) {
@@ -135,17 +149,4 @@
   .grid {
     grid-template-columns: 1fr;
   }
-}
-
-
-.actionMessage {
-  margin-top: 10px;
-  color: #555555;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.invoiceButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
 }

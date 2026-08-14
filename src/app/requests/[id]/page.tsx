@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
-import GenerateInvoiceButton from "./GenerateInvoiceButton";
+import InvoicePanel from "./InvoicePanel";
 
 type RequestDetailsPageProps = {
     params: Promise<{
@@ -132,46 +132,18 @@ export default async function RequestDetailsPage({
                     </div>
                 </section>
 
-                {request.invoice && (
-                    <section className={styles.section}>
-                        <h2>Invoice</h2>
-
-                        <div className={styles.grid}>
-                            <div>
-                                <span>Invoice Number</span>
-                                <strong>
-                                    {request.invoice.invoiceNumber}
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>Status</span>
-                                <strong>
-                                    {request.invoice.status.replaceAll(
-                                        "_",
-                                        " "
-                                    )}
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>Currency</span>
-                                <strong>{request.invoice.currency}</strong>
-                            </div>
-
-                            <div>
-                                <span>Valid Until</span>
-                                <strong>
-                                    {request.invoice.validUntil.toLocaleDateString()}
-                                </strong>
-                            </div>
-                        </div>
-                    </section>
-                )}
-
-                <GenerateInvoiceButton
+                <InvoicePanel
                     requestId={request.id}
-                    hasInvoice={Boolean(request.invoice)}
+                    customerName={request.customerName}
+                    phone={request.phone}
+                    email={request.email}
+                    requestSource={request.requestSource}
+                    shippingMethod={request.shippingMethod}
+                    goodsCategory={request.goodsCategory}
+                    weightKg={request.weightKg?.toString() ?? null}
+                    volumeCbm={request.volumeCbm?.toString() ?? null}
+                    goodsDescription={request.goodsDescription}
+                    invoice={request.invoice}
                 />
             </div>
         </main >

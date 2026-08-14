@@ -7,22 +7,18 @@ type RouteContext = {
   }>;
 };
 
-export async function POST(
-  _request: Request,
-  context: RouteContext
-) {
+export async function POST(_request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
 
-    const customerRequest =
-      await prisma.customerRequest.findUnique({
-        where: {
-          id,
-        },
-        include: {
-          invoice: true,
-        },
-      });
+    const customerRequest = await prisma.customerRequest.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        invoice: true,
+      },
+    });
 
     if (!customerRequest) {
       return NextResponse.json(
@@ -57,13 +53,10 @@ export async function POST(
       data: {
         invoiceNumber,
         customerRequestId: customerRequest.id,
-
         currency: "USD",
-
         exchangeRate: 1,
         subtotalUsd: 0,
         totalGhs: 0,
-
         validUntil,
       },
     });

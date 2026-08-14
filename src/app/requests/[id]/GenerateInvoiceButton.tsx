@@ -45,7 +45,7 @@ export default function GenerateInvoiceButton({
 
       setMessage("Invoice created successfully.");
 
-      router.refresh();
+      router.push(`/requests/${requestId}/invoice`);
     } catch {
       setMessage("Unable to create invoice.");
     } finally {
