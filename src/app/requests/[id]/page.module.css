@@ -1,0 +1,146 @@
+.page {
+  min-height: 100vh;
+  padding: 48px 24px;
+  background: #f6f6f6;
+  color: #111111;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: #555555;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: #f97316;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #f97316;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: #666666;
+}
+
+.status {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #dddddd;
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.section {
+  margin-bottom: 24px;
+  padding: 28px;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.section h2 {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.grid div,
+.description {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.grid span,
+.description span {
+  color: #777777;
+  font-size: 13px;
+}
+
+.grid strong {
+  font-size: 16px;
+}
+
+.description {
+  margin-top: 24px;
+}
+
+.description p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.invoiceButton {
+  border: none;
+  border-radius: 8px;
+  padding: 14px 20px;
+  background: #f97316;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.invoiceButton:hover {
+  background: #d85f0b;
+}
+
+@media (max-width: 700px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.actionMessage {
+  margin-top: 10px;
+  color: #555555;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.invoiceButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

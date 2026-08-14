@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum RequestStatus {
+  NEW
+  INVOICED
+  AWAITING_PAYMENT
+  PAID
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  AWAITING_PAYMENT
+  PAID
+  CANCELLED
+}
+
+model CustomerRequest {
+  id               String   @id @default(cuid())
+  requestNumber    String   @unique
+  customerName     String
+  phone            String
+  email            String?
+  requestSource    String
+  shippingMethod   String
+  goodsCategory    String
+  weightKg         Decimal?
+  volumeCbm        Decimal?
+  goodsDescription String
+  createdAt        DateTime @default(now())
+  status           RequestStatus @default(NEW)
+  updatedAt        DateTime @updatedAt
+
+
+  invoice          Invoice?
+}
+
+
+model Invoice {
+  id                String          @id @default(cuid())
+  invoiceNumber     String          @unique
+
+  customerRequestId String          @unique
+  customerRequest   CustomerRequest @relation(fields: [customerRequestId], references: [id], onDelete: Restrict)
+
+  currency          String          @default("USD")
+
+  exchangeRate      Decimal
+  subtotalUsd       Decimal
+  totalGhs          Decimal
+
+  validUntil        DateTime
+
+  status            InvoiceStatus    @default(DRAFT)
+
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}

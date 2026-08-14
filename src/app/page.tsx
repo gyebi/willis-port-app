@@ -1,7 +1,26 @@
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
-import Link from "next/link"
 
-export default function Home() {
+export default async function Home() {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const requestsToday = await prisma.customerRequest.count({
+    where: {
+      createdAt: {
+        gte: startOfToday,
+      },
+    },
+  });
+
+  const recentRequests = await prisma.customerRequest.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: 10,
+  });
+
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -24,7 +43,7 @@ export default function Home() {
       <section className={styles.stats}>
         <article className={styles.card}>
           <p>Requests Today</p>
-          <strong>0</strong>
+          <strong>{requestsToday}</strong>
         </article>
 
         <article className={styles.card}>
@@ -47,20 +66,59 @@ export default function Home() {
         <div className={styles.sectionHeader}>
           <div>
             <h2>Recent Requests</h2>
-            <p>Customer shipping requests will appear here.</p>
+            <p>Latest customer shipping requests.</p>
           </div>
         </div>
 
-        <div className={styles.emptyState}>
-          <h3>No requests yet</h3>
-          <p>
-            Create the first customer request to begin processing a shipment.
-          </p>
+        {recentRequests.length === 0 ? (
+          <div className={styles.emptyState}>
+            <h3>No requests yet</h3>
 
-          <Link href="/requests/new" className={styles.emptyButton}>
-            Create Request
-          </Link>
-        </div>
+            <p>
+              Create the first customer request to begin processing a shipment.
+            </p>
+
+            <Link
+              href="/requests/new"
+              className={styles.emptyButton}
+            >
+              Create Request
+            </Link>
+          </div>
+        ) : (
+          <div className={styles.requestList}>
+
+            {recentRequests.map((request) => (
+              <Link
+                key={request.id}
+                href={`/requests/${request.id}`}
+                className={styles.requestRow}
+              >
+                <div>
+                  <strong>{request.customerName}</strong>
+                  <p>{request.requestNumber}</p>
+                </div>
+
+                <div>
+                  <span>{request.shippingMethod}</span>
+                  <p>{request.goodsCategory}</p>
+                </div>
+
+                <div>
+                  <span className={styles.status}>
+                    {request.status.replaceAll("_", " ")}
+                  </span>
+                </div>
+
+                <div>
+                  <span>
+                    {request.createdAt.toLocaleDateString()}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
