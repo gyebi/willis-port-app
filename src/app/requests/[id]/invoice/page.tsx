@@ -128,6 +128,7 @@ export default async function InvoicePage({
         </section>
 
         <InvoiceActions
+          requestId={customerRequest.id}
           customerPhone={customerRequest.phone}
           customerEmail={customerRequest.email}
         />
@@ -135,3 +136,5 @@ export default async function InvoicePage({
     </main>
   );
 }
+
+

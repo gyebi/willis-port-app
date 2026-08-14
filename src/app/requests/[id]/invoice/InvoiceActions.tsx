@@ -1,14 +1,20 @@
+"use client";
+
 import styles from "./page.module.css";
 
 type InvoiceActionsProps = {
+  requestId: string;
   customerPhone: string;
   customerEmail: string | null;
 };
 
 export default function InvoiceActions({
+  requestId,
   customerPhone,
   customerEmail,
 }: InvoiceActionsProps) {
+  const pdfUrl = `/api/requests/${requestId}/invoice/pdf`;
+
   return (
     <section className={styles.section}>
       <h2>Send / Share</h2>
@@ -18,9 +24,19 @@ export default function InvoiceActions({
       </p>
 
       <div className={styles.actions}>
-        <button type="button">Preview Invoice</button>
+        <button
+          type="button"
+          onClick={() => window.open(pdfUrl, "_blank")}
+        >
+          Preview Invoice
+        </button>
 
-        <button type="button">PDF</button>
+        <button
+          type="button"
+          onClick={() => window.open(pdfUrl, "_blank")}
+        >
+          PDF
+        </button>
 
         <button type="button" disabled={!customerPhone}>
           WhatsApp

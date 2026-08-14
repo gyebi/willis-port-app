@@ -70,6 +70,7 @@ export default function InvoicePanel({
             goodsDescription={goodsDescription}
           />
           <InvoiceActions
+            requestId={requestId}
             customerPhone={phone}
             customerEmail={email}
           />
