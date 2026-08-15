@@ -63,6 +63,21 @@ export default function PricingForm({
     "DRAFT" | "APPROVED" | "SUPERSEDED" | null
   >(latestPricing?.status ?? null);
 
+  const [freightChargeUsd, setFreightChargeUsd] =
+    useState("");
+  const [handlingChargeUsd, setHandlingChargeUsd] =
+    useState("");
+  const [documentationChargeUsd, setDocumentationChargeUsd] =
+    useState("");
+  const [specialHandlingChargeUsd, setSpecialHandlingChargeUsd] =
+    useState("");
+  const [deliveryChargeUsd, setDeliveryChargeUsd] =
+    useState("");
+  const [otherChargeDescription, setOtherChargeDescription] =
+    useState("");
+  const [otherChargeUsd, setOtherChargeUsd] =
+    useState("");
+
   const [isSaving, setIsSaving] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [message, setMessage] = useState("");
@@ -72,17 +87,25 @@ export default function PricingForm({
 
   const preview = useMemo(() => {
     const exchangeRate = Number(exchangeRateToGhs || 0);
+    const extraChargesUsd =
+      Number(freightChargeUsd || 0) +
+      Number(handlingChargeUsd || 0) +
+      Number(documentationChargeUsd || 0) +
+      Number(specialHandlingChargeUsd || 0) +
+      Number(deliveryChargeUsd || 0) +
+      Number(otherChargeUsd || 0);
 
     if (pricingBasis === "CBM") {
       const quantity = Number(chargeableCbm || 0);
       const rate = Number(unitRateUsd || 0);
 
-      const usd = quantity * rate;
+      const baseUsd = quantity * rate;
+      const totalUsd = baseUsd + extraChargesUsd;
 
       return {
         quantity,
-        usd,
-        ghs: usd * exchangeRate,
+        usd: totalUsd,
+        ghs: totalUsd * exchangeRate,
       };
     }
 
@@ -90,21 +113,23 @@ export default function PricingForm({
       const quantity = Number(chargeableWeightKg || 0);
       const rate = Number(unitRateUsd || 0);
 
-      const usd = quantity * rate;
+      const baseUsd = quantity * rate;
+      const totalUsd = baseUsd + extraChargesUsd;
 
       return {
         quantity,
-        usd,
-        ghs: usd * exchangeRate,
+        usd: totalUsd,
+        ghs: totalUsd * exchangeRate,
       };
     }
 
-    const usd = Number(manualChargeUsd || 0);
+    const baseUsd = Number(manualChargeUsd || 0);
+    const totalUsd = baseUsd + extraChargesUsd;
 
     return {
       quantity: 1,
-      usd,
-      ghs: usd * exchangeRate,
+      usd: totalUsd,
+      ghs: totalUsd * exchangeRate,
     };
   }, [
     pricingBasis,
@@ -113,6 +138,12 @@ export default function PricingForm({
     unitRateUsd,
     manualChargeUsd,
     exchangeRateToGhs,
+    freightChargeUsd,
+    handlingChargeUsd,
+    documentationChargeUsd,
+    specialHandlingChargeUsd,
+    deliveryChargeUsd,
+    otherChargeUsd,
   ]);
 
   async function handleSubmit(
@@ -141,6 +172,13 @@ export default function PricingForm({
             chargeableWeightKg,
             unitRateUsd,
             manualChargeUsd,
+            freightChargeUsd,
+            handlingChargeUsd,
+            documentationChargeUsd,
+            specialHandlingChargeUsd,
+            deliveryChargeUsd,
+            otherChargeDescription,
+            otherChargeUsd,
             exchangeRateToGhs,
             notes,
           }),
@@ -346,9 +384,134 @@ export default function PricingForm({
             onChange={(event) =>
               setManualChargeUsd(event.target.value)
             }
-          />
+            />
         </div>
       )}
+
+      <div className={styles.grid}>
+        <div>
+          <label htmlFor="freightChargeUsd">
+            Freight Charge (USD)
+          </label>
+          <input
+            id="freightChargeUsd"
+            type="number"
+            min="0"
+            step="0.01"
+            value={freightChargeUsd}
+            disabled={isApproved}
+            onChange={(e) =>
+              setFreightChargeUsd(e.target.value)
+            }
+          />
+        </div>
+
+        <div>
+          <label htmlFor="handlingChargeUsd">
+            Handling Charge (USD)
+          </label>
+          <input
+            id="handlingChargeUsd"
+            type="number"
+            min="0"
+            step="0.01"
+            value={handlingChargeUsd}
+            disabled={isApproved}
+            onChange={(e) =>
+              setHandlingChargeUsd(e.target.value)
+            }
+          />
+        </div>
+
+        <div>
+          <label htmlFor="documentationChargeUsd">
+            Documentation Charge (USD)
+          </label>
+          <input
+            id="documentationChargeUsd"
+            type="number"
+            min="0"
+            step="0.01"
+            value={documentationChargeUsd}
+            disabled={isApproved}
+            onChange={(e) =>
+              setDocumentationChargeUsd(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div>
+          <label htmlFor="specialHandlingChargeUsd">
+            Special Handling (USD)
+          </label>
+          <input
+            id="specialHandlingChargeUsd"
+            type="number"
+            min="0"
+            step="0.01"
+            value={specialHandlingChargeUsd}
+            disabled={isApproved}
+            onChange={(e) =>
+              setSpecialHandlingChargeUsd(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div>
+          <label htmlFor="deliveryChargeUsd">
+            Delivery Charge (USD)
+          </label>
+          <input
+            id="deliveryChargeUsd"
+            type="number"
+            min="0"
+            step="0.01"
+            value={deliveryChargeUsd}
+            disabled={isApproved}
+            onChange={(e) =>
+              setDeliveryChargeUsd(e.target.value)
+            }
+          />
+        </div>
+
+        <div>
+          <label htmlFor="otherChargeDescription">
+            Other Charge Description
+          </label>
+          <input
+            id="otherChargeDescription"
+            type="text"
+            value={otherChargeDescription}
+            disabled={isApproved}
+            onChange={(e) =>
+              setOtherChargeDescription(
+                e.target.value
+              )
+            }
+          />
+        </div>
+
+        <div>
+          <label htmlFor="otherChargeUsd">
+            Other Charge (USD)
+          </label>
+          <input
+            id="otherChargeUsd"
+            type="number"
+            min="0"
+            step="0.01"
+            value={otherChargeUsd}
+            disabled={isApproved}
+            onChange={(e) =>
+              setOtherChargeUsd(e.target.value)
+            }
+          />
+        </div>
+      </div>
 
       <div className={styles.grid}>
         <div>

@@ -14,6 +14,13 @@ type PricingBody = {
   chargeableWeightKg?: unknown;
   unitRateUsd?: unknown;
   manualChargeUsd?: unknown;
+  freightChargeUsd?: unknown;
+  handlingChargeUsd?: unknown;
+  documentationChargeUsd?: unknown;
+  specialHandlingChargeUsd?: unknown;
+  deliveryChargeUsd?: unknown;
+  otherChargeDescription?: unknown;
+  otherChargeUsd?: unknown;
   exchangeRateToGhs?: unknown;
   notes?: unknown;
 };
@@ -76,6 +83,36 @@ export async function POST(
       );
     }
 
+    const freightChargeUsd =
+      parseOptionalDecimal(body.freightChargeUsd) ??
+      new Prisma.Decimal(0);
+
+    const handlingChargeUsd =
+      parseOptionalDecimal(body.handlingChargeUsd) ??
+      new Prisma.Decimal(0);
+
+    const documentationChargeUsd =
+      parseOptionalDecimal(body.documentationChargeUsd) ??
+      new Prisma.Decimal(0);
+
+    const specialHandlingChargeUsd =
+      parseOptionalDecimal(
+        body.specialHandlingChargeUsd
+      ) ?? new Prisma.Decimal(0);
+
+    const deliveryChargeUsd =
+      parseOptionalDecimal(body.deliveryChargeUsd) ??
+      new Prisma.Decimal(0);
+
+    const otherChargeUsd =
+      parseOptionalDecimal(body.otherChargeUsd) ??
+      new Prisma.Decimal(0);
+
+    const otherChargeDescription =
+      typeof body.otherChargeDescription === "string"
+        ? body.otherChargeDescription.trim() || null
+        : null;
+
     const shipment =
       await prisma.shipment.findUnique({
         where: {
@@ -111,7 +148,7 @@ export async function POST(
       | Prisma.Decimal
       | null = null;
 
-    let customerChargeUsd:
+    let baseChargeUsd:
       Prisma.Decimal;
 
     if (pricingBasis === "CBM") {
@@ -150,7 +187,7 @@ export async function POST(
       billableQuantity =
         shipment.chargeableCbm;
 
-      customerChargeUsd =
+      baseChargeUsd =
         billableQuantity.mul(unitRate);
     } else if (pricingBasis === "KG") {
       chargeableWeight =
@@ -184,7 +221,7 @@ export async function POST(
       billableQuantity =
         chargeableWeight;
 
-      customerChargeUsd =
+      baseChargeUsd =
         billableQuantity.mul(unitRate);
     } else {
       manualCharge =
@@ -206,9 +243,20 @@ export async function POST(
         );
       }
 
-      customerChargeUsd =
+      baseChargeUsd =
         manualCharge;
     }
+
+    const extraChargesUsd =
+      freightChargeUsd
+        .add(handlingChargeUsd)
+        .add(documentationChargeUsd)
+        .add(specialHandlingChargeUsd)
+        .add(deliveryChargeUsd)
+        .add(otherChargeUsd);
+
+    const customerChargeUsd =
+      baseChargeUsd.add(extraChargesUsd);
 
     const customerChargeGhs =
       customerChargeUsd.mul(exchangeRate);
@@ -240,6 +288,14 @@ export async function POST(
 
           manualChargeUsd:
             manualCharge,
+
+          freightChargeUsd,
+          handlingChargeUsd,
+          documentationChargeUsd,
+          specialHandlingChargeUsd,
+          deliveryChargeUsd,
+          otherChargeDescription,
+          otherChargeUsd,
 
           exchangeRateToGhs:
             exchangeRate,
@@ -350,4 +406,38 @@ function parseOptionalText(
   const text = value.trim();
 
   return text || null;
+}
+
+function parseOptionalDecimal(
+  value: unknown
+): Prisma.Decimal | null {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
+    return null;
+  }
+
+  if (
+    typeof value !== "string" &&
+    typeof value !== "number"
+  ) {
+    return null;
+  }
+
+  try {
+    const amount = new Prisma.Decimal(value);
+
+    if (
+      amount.lessThan(0) ||
+      amount.greaterThan(1_000_000_000)
+    ) {
+      return null;
+    }
+
+    return amount;
+  } catch {
+    return null;
+  }
 }

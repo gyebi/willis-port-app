@@ -108,38 +108,44 @@ export default async function InvoicePage({
               </thead>
 
               <tbody>
-                {invoice.lines.map((line) => (
-                  <tr key={line.id}>
-                    <td>
-                      {line.shipment.trackingNumber ??
-                        line.shipment.shipmentNumber}
-                    </td>
+                {invoice.lines.map((line) => {
+                  const tracking = line.shipment
+                    ? line.shipment.trackingNumber ??
+                      line.shipment.shipmentNumber
+                    : "—";
 
-                    <td>
-                      {line.description ?? "Not provided"}
-                    </td>
+                  return (
+                    <tr key={line.id}>
+                      <td>{tracking}</td>
 
-                    <td>{line.pricingBasis}</td>
+                      <td>
+                        {line.description ?? "Not provided"}
+                      </td>
 
-                    <td>
-                      {line.billableQuantity?.toString() ?? "—"}
-                    </td>
+                      <td>
+                        {line.pricingBasis ?? "—"}
+                      </td>
 
-                    <td>
-                      {line.unitRateUsd
-                        ? `$${line.unitRateUsd.toString()}`
-                        : "—"}
-                    </td>
+                      <td>
+                        {line.billableQuantity?.toString() ?? "—"}
+                      </td>
 
-                    <td>
-                      ${line.lineTotalUsd.toString()}
-                    </td>
+                      <td>
+                        {line.unitRateUsd
+                          ? `$${line.unitRateUsd.toString()}`
+                          : "—"}
+                      </td>
 
-                    <td>
-                      GHS {line.lineTotalGhs.toString()}
-                    </td>
-                  </tr>
-                ))}
+                      <td>
+                        ${line.lineTotalUsd.toString()}
+                      </td>
+
+                      <td>
+                        GHS {line.lineTotalGhs.toString()}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

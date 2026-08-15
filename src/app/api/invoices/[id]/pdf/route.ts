@@ -83,7 +83,7 @@ export async function GET(
     let y = pageHeight - margin;
 
     function drawText(
-      text: string,
+      text: string | null | undefined,
       x: number,
       currentY: number,
       options?: {
@@ -91,7 +91,9 @@ export async function GET(
         bold?: boolean;
       }
     ) {
-      page.drawText(text, {
+      const safeText = text ?? "";
+
+      page.drawText(safeText, {
         x,
         y: currentY,
         size: options?.size ?? 10,
@@ -330,8 +332,10 @@ export async function GET(
       ensureSpace(28);
 
       drawText(
-        line.shipment.trackingNumber ??
-          line.shipment.shipmentNumber,
+        line.shipment
+          ? line.shipment.trackingNumber ??
+          line.shipment.shipmentNumber
+          : "—",
         margin,
         y,
         {
@@ -348,9 +352,14 @@ export async function GET(
         }
       );
 
-      drawText(line.pricingBasis, 280, y, {
-        size: 8.5,
-      });
+      drawText(
+        line.pricingBasis ?? "—",
+        280,
+        y,
+        {
+          size: 8.5,
+        }
+      );
 
       drawText(
         line.billableQuantity?.toString() ?? "—",

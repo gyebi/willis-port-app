@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
 type RouteContext = {
@@ -115,16 +116,171 @@ export async function POST(
 
     const invoice = await prisma.$transaction(
       async (tx) => {
+        const invoiceLines = pricingRecords.flatMap(
+          (pricing) => {
+            const lines = [];
+
+            const baseChargeUsd =
+              pricing.pricingBasis === "MANUAL"
+                ? pricing.manualChargeUsd
+                : pricing.billableQuantity &&
+                    pricing.unitRateUsd
+                  ? pricing.billableQuantity.mul(
+                      pricing.unitRateUsd
+                    )
+                  : new Prisma.Decimal(0);
+
+            const baseChargeGhs =
+              baseChargeUsd.mul(
+                pricing.exchangeRateToGhs
+              );
+
+            lines.push({
+              lineType: "SHIPMENT" as const,
+              shipmentId: pricing.shipmentId,
+              shipmentPricingId: pricing.id,
+
+              description:
+                pricing.shipment.description ??
+                pricing.shipment.trackingNumber ??
+                pricing.shipment.shipmentNumber,
+
+              pricingBasis: pricing.pricingBasis,
+              billableQuantity:
+                pricing.billableQuantity,
+              unitRateUsd: pricing.unitRateUsd,
+
+              lineTotalUsd: baseChargeUsd,
+              lineTotalGhs: baseChargeGhs,
+            });
+
+            if (pricing.freightChargeUsd.gt(0)) {
+              lines.push({
+                lineType: "FREIGHT" as const,
+                shipmentId: pricing.shipmentId,
+                shipmentPricingId: pricing.id,
+                description: "Freight Charge",
+                pricingBasis: null,
+                billableQuantity: null,
+                unitRateUsd: null,
+                lineTotalUsd: pricing.freightChargeUsd,
+                lineTotalGhs:
+                  pricing.freightChargeUsd.mul(
+                    pricing.exchangeRateToGhs
+                  ),
+              });
+            }
+
+            if (pricing.handlingChargeUsd.gt(0)) {
+              lines.push({
+                lineType: "HANDLING" as const,
+                shipmentId: pricing.shipmentId,
+                shipmentPricingId: pricing.id,
+                description: "Handling Charge",
+                pricingBasis: null,
+                billableQuantity: null,
+                unitRateUsd: null,
+                lineTotalUsd: pricing.handlingChargeUsd,
+                lineTotalGhs:
+                  pricing.handlingChargeUsd.mul(
+                    pricing.exchangeRateToGhs
+                  ),
+              });
+            }
+
+            if (
+              pricing.documentationChargeUsd.gt(0)
+            ) {
+              lines.push({
+                lineType: "DOCUMENTATION" as const,
+                shipmentId: pricing.shipmentId,
+                shipmentPricingId: pricing.id,
+                description:
+                  "Documentation Charge",
+                pricingBasis: null,
+                billableQuantity: null,
+                unitRateUsd: null,
+                lineTotalUsd:
+                  pricing.documentationChargeUsd,
+                lineTotalGhs:
+                  pricing.documentationChargeUsd.mul(
+                    pricing.exchangeRateToGhs
+                  ),
+              });
+            }
+
+            if (
+              pricing.specialHandlingChargeUsd.gt(0)
+            ) {
+              lines.push({
+                lineType:
+                  "SPECIAL_HANDLING" as const,
+                shipmentId: pricing.shipmentId,
+                shipmentPricingId: pricing.id,
+                description:
+                  "Special Handling Charge",
+                pricingBasis: null,
+                billableQuantity: null,
+                unitRateUsd: null,
+                lineTotalUsd:
+                  pricing.specialHandlingChargeUsd,
+                lineTotalGhs:
+                  pricing.specialHandlingChargeUsd.mul(
+                    pricing.exchangeRateToGhs
+                  ),
+              });
+            }
+
+            if (pricing.deliveryChargeUsd.gt(0)) {
+              lines.push({
+                lineType: "DELIVERY" as const,
+                shipmentId: pricing.shipmentId,
+                shipmentPricingId: pricing.id,
+                description: "Delivery Charge",
+                pricingBasis: null,
+                billableQuantity: null,
+                unitRateUsd: null,
+                lineTotalUsd: pricing.deliveryChargeUsd,
+                lineTotalGhs:
+                  pricing.deliveryChargeUsd.mul(
+                    pricing.exchangeRateToGhs
+                  ),
+              });
+            }
+
+            if (pricing.otherChargeUsd.gt(0)) {
+              lines.push({
+                lineType: "OTHER" as const,
+                shipmentId: pricing.shipmentId,
+                shipmentPricingId: pricing.id,
+                description:
+                  pricing.otherChargeDescription ??
+                  "Other Charge",
+                pricingBasis: null,
+                billableQuantity: null,
+                unitRateUsd: null,
+                lineTotalUsd: pricing.otherChargeUsd,
+                lineTotalGhs:
+                  pricing.otherChargeUsd.mul(
+                    pricing.exchangeRateToGhs
+                  ),
+              });
+            }
+
+            return lines;
+          }
+        );
+
         let subtotalUsd = 0;
         let totalGhs = 0;
 
-        for (const pricing of pricingRecords) {
+        for (const line of invoiceLines) {
           subtotalUsd += Number(
-            pricing.customerChargeUsd.toString()
+            line.lineTotalUsd.toString()
           );
 
           totalGhs += Number(
-            pricing.customerChargeGhs.toString()
+            line.lineTotalGhs.toString()
           );
         }
 
@@ -139,7 +295,8 @@ export async function POST(
 
             currency: "USD",
 
-            exchangeRate: 1,
+            exchangeRate:
+              pricingRecords[0].exchangeRateToGhs,
             subtotalUsd,
             totalGhs,
 
@@ -148,31 +305,7 @@ export async function POST(
             status: "DRAFT",
 
             lines: {
-              create: pricingRecords.map((pricing) => ({
-                lineType: "SHIPMENT",
-
-                shipmentId: pricing.shipmentId,
-                shipmentPricingId: pricing.id,
-
-                description:
-                  pricing.shipment.description ??
-                  pricing.shipment.trackingNumber ??
-                  pricing.shipment.shipmentNumber,
-
-                pricingBasis:
-                  pricing.pricingBasis,
-
-                billableQuantity:
-                  pricing.billableQuantity,
-
-                unitRateUsd: pricing.unitRateUsd,
-
-                lineTotalUsd:
-                  pricing.customerChargeUsd,
-
-                lineTotalGhs:
-                  pricing.customerChargeGhs,
-              })),
+              create: invoiceLines,
             },
           },
           include: {

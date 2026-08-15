@@ -273,38 +273,37 @@ model ShipmentPricing {
   pricingBasis ShipmentPricingBasis
   status       ShipmentPricingStatus @default(DRAFT)
 
-  // Snapshot of measurements used for this calculation.
   actualCbm          Decimal?
   chargeableCbm      Decimal?
   weightKg           Decimal?
   chargeableWeightKg Decimal?
 
-  // The actual quantity being billed.
   billableQuantity Decimal?
+  unitRateUsd      Decimal?
+  manualChargeUsd  Decimal?
 
-  // Example:
-  // CBM: 0.15 × $250
-  // KG:  34 × $8
-  unitRateUsd Decimal?
+  freightChargeUsd         Decimal @default(0)
+  handlingChargeUsd        Decimal @default(0)
+  documentationChargeUsd   Decimal @default(0)
+  specialHandlingChargeUsd Decimal @default(0)
+  deliveryChargeUsd        Decimal @default(0)
 
-  // Used when pricingBasis = MANUAL.
-  manualChargeUsd Decimal?
+  otherChargeDescription String?
+  otherChargeUsd         Decimal @default(0)
 
   exchangeRateToGhs Decimal @default(1)
 
-  // Customer-facing amounts.
   customerChargeUsd Decimal @default(0)
   customerChargeGhs Decimal @default(0)
 
-  // Internal Willis Port financials.
   internalCostGhs Decimal?
   profitGhs       Decimal?
-
-  invoiceLines InvoiceLine[]
 
   notes String?
 
   approvedAt DateTime?
+
+  invoiceLines InvoiceLine[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -313,4 +312,3 @@ model ShipmentPricing {
   @@index([status])
   @@index([pricingBasis])
 }
-
