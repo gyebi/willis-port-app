@@ -1,0 +1,183 @@
+.page {
+  min-height: 100vh;
+  padding: 48px 24px;
+  background: #f6f6f6;
+  color: #111111;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: #555555;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: #f97316;
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #f97316;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.header p {
+  margin-top: 8px;
+  color: #666666;
+}
+
+.section {
+  margin-bottom: 24px;
+  padding: 28px;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.section h2 {
+  margin: 0 0 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.grid > div,
+.section > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.grid span,
+.section label {
+  color: #777777;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.section input,
+.section select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111111;
+  font: inherit;
+}
+
+.section input:focus,
+.section select:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+}
+
+.totalBox {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid #f97316;
+  border-radius: 10px;
+  background: #fff7ed;
+}
+
+.totalBox span {
+  display: block;
+  margin-bottom: 6px;
+  color: #9a4d0b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.totalBox strong {
+  display: block;
+  font-size: 24px;
+}
+
+.totalBox small {
+  margin-top: 4px;
+  color: #666666;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  margin-top: 20px;
+}
+
+.actions button {
+  padding: 12px 18px;
+  border: 1px solid #f97316;
+  border-radius: 8px;
+  background: #f97316;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.actions button:hover:not(:disabled) {
+  background: #ea580c;
+}
+
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.approveButton {
+  border-color: #111111 !important;
+  background: #111111 !important;
+}
+
+.approvedBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid #18794e;
+  border-radius: 999px;
+  background: #ecfdf3;
+  color: #18794e;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.success {
+  margin-top: 16px;
+  color: #18794e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.error {
+  margin-top: 16px;
+  color: #b42318;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

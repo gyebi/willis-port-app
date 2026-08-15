@@ -46,8 +46,11 @@ model Invoice {
   id            String @id @default(cuid())
   invoiceNumber String @unique
 
-  customerRequestId String          @unique
-  customerRequest   CustomerRequest @relation(fields: [customerRequestId], references: [id], onDelete: Restrict)
+  customerRequestId String?          @unique
+  customerRequest   CustomerRequest? @relation(fields: [customerRequestId], references: [id], onDelete: Restrict)
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Restrict)
 
   currency String @default("USD")
 
@@ -66,8 +69,40 @@ model Invoice {
 
   status InvoiceStatus @default(DRAFT)
 
+  lines InvoiceLine[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+model InvoiceLine {
+  id String @id @default(cuid())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  shipmentId String
+  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
+
+  shipmentPricingId String
+  shipmentPricing   ShipmentPricing @relation(fields: [shipmentPricingId], references: [id], onDelete: Restrict)
+
+  description String?
+
+  pricingBasis ShipmentPricingBasis
+
+  billableQuantity Decimal?
+  unitRateUsd      Decimal?
+  lineTotalUsd     Decimal
+  lineTotalGhs     Decimal
+
+  createdAt DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([shipmentId])
+  @@index([shipmentPricingId])
 }
 
 enum PricingBasis {
@@ -130,6 +165,7 @@ model Customer {
   address  String?
 
   shipments Shipment[]
+  invoices  Invoice[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -189,6 +225,9 @@ model Shipment {
   containerId String?
   container   Container? @relation(fields: [containerId], references: [id], onDelete: SetNull)
 
+  pricings     ShipmentPricing[]
+  invoiceLines InvoiceLine[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -197,4 +236,66 @@ model Shipment {
   @@index([containerId])
   @@index([status])
   @@index([eta])
+}
+
+enum ShipmentPricingBasis {
+  CBM
+  KG
+  MANUAL
+}
+
+enum ShipmentPricingStatus {
+  DRAFT
+  APPROVED
+  SUPERSEDED
+}
+
+model ShipmentPricing {
+  id String @id @default(cuid())
+
+  shipmentId String
+  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
+
+  pricingBasis ShipmentPricingBasis
+  status       ShipmentPricingStatus @default(DRAFT)
+
+  // Snapshot of measurements used for this calculation.
+  actualCbm          Decimal?
+  chargeableCbm      Decimal?
+  weightKg           Decimal?
+  chargeableWeightKg Decimal?
+
+  // The actual quantity being billed.
+  billableQuantity Decimal?
+
+  // Example:
+  // CBM: 0.15 × $250
+  // KG:  34 × $8
+  unitRateUsd Decimal?
+
+  // Used when pricingBasis = MANUAL.
+  manualChargeUsd Decimal?
+
+  exchangeRateToGhs Decimal @default(1)
+
+  // Customer-facing amounts.
+  customerChargeUsd Decimal @default(0)
+  customerChargeGhs Decimal @default(0)
+
+  // Internal Willis Port financials.
+  internalCostGhs Decimal?
+  profitGhs       Decimal?
+
+  invoiceLines InvoiceLine[]
+
+  notes String?
+
+  approvedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shipmentId])
+  @@index([status])
+  @@index([pricingBasis])
 }

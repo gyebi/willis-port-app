@@ -2,21 +2,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
-import InvoiceReadyShipments from "./InvoiceReadyShipments";
 import styles from "./page.module.css";
 
-type CustomerPageProps = {
+type ContainerPageProps = {
   params: Promise<{
     id: string;
   }>;
 };
 
-export default async function CustomerPage({
+export default async function ContainerPage({
   params,
-}: CustomerPageProps) {
+}: ContainerPageProps) {
   const { id } = await params;
 
-  const customer = await prisma.customer.findUnique({
+  const container = await prisma.container.findUnique({
     where: {
       id,
     },
@@ -31,45 +30,54 @@ export default async function CustomerPage({
           },
         ],
         include: {
-          container: true,
-          pricings: {
-            where: {
-              status: "APPROVED",
-            },
-            orderBy: {
-              approvedAt: "desc",
-            },
-            take: 1,
-          },
+          customer: true,
         },
       },
     },
   });
 
-  if (!customer) {
+  if (!container) {
     notFound();
   }
+
+  const totalActualCbm = container.shipments.reduce(
+    (total, shipment) =>
+      total + Number(shipment.actualCbm?.toString() ?? 0),
+    0
+  );
+
+  const totalChargeableCbm = container.shipments.reduce(
+    (total, shipment) =>
+      total + Number(shipment.chargeableCbm?.toString() ?? 0),
+    0
+  );
 
   return (
     <main className={styles.page}>
       <div className={styles.container}>
-        <Link href="/customers" className={styles.backLink}>
-          ← Back to Customers
+        <Link
+          href="/containers"
+          className={styles.backLink}
+        >
+          ← Back to Containers
         </Link>
 
         <header className={styles.header}>
           <div>
             <p className={styles.eyebrow}>WILLIS PORT</p>
-            <h1>{customer.name}</h1>
+
+            <h1>{container.containerNumber}</h1>
+
             <p className={styles.subtitle}>
-              Customer shipment and tracking history.
+              Container shipment and transit details.
             </p>
           </div>
 
           <div className={styles.shipmentTotal}>
-            <strong>{customer.shipments.length}</strong>
+            <strong>{container.shipments.length}</strong>
+
             <span>
-              {customer.shipments.length === 1
+              {container.shipments.length === 1
                 ? "Shipment"
                 : "Shipments"}
             </span>
@@ -77,72 +85,116 @@ export default async function CustomerPage({
         </header>
 
         <section className={styles.section}>
-          <h2>Customer Information</h2>
+          <h2>Container Information</h2>
 
           <div className={styles.infoGrid}>
             <div>
-              <span>Phone</span>
-              <strong>{customer.phone ?? "Not provided"}</strong>
+              <span>Shipping Mode</span>
+              <strong>{container.shippingMode}</strong>
             </div>
 
             <div>
-              <span>WhatsApp</span>
-              <strong>{customer.whatsapp ?? "Not provided"}</strong>
+              <span>Status</span>
+              <strong>
+                {formatStatus(container.status)}
+              </strong>
             </div>
 
             <div>
-              <span>Email</span>
-              <strong>{customer.email ?? "Not provided"}</strong>
+              <span>Estimated Loading Date</span>
+              <strong>
+                {container.estimatedLoadingDate
+                  ? container.estimatedLoadingDate.toLocaleDateString()
+                  : "Not set"}
+              </strong>
             </div>
 
             <div>
-              <span>Address</span>
-              <strong>{customer.address ?? "Not provided"}</strong>
+              <span>Departure Date</span>
+              <strong>
+                {container.departureDate
+                  ? container.departureDate.toLocaleDateString()
+                  : "Not set"}
+              </strong>
             </div>
+
+            <div>
+              <span>ETA</span>
+              <strong>
+                {container.eta
+                  ? container.eta.toLocaleDateString()
+                  : "Not set"}
+              </strong>
+            </div>
+
+            <div>
+              <span>Actual Arrival</span>
+              <strong>
+                {container.actualArrivalDate
+                  ? container.actualArrivalDate.toLocaleDateString()
+                  : "Not set"}
+              </strong>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.summarySection}>
+          <div>
+            <span>Total Actual CBM</span>
+            <strong>{totalActualCbm.toFixed(4)}</strong>
+          </div>
+
+          <div>
+            <span>Total Chargeable CBM</span>
+            <strong>
+              {totalChargeableCbm.toFixed(4)}
+            </strong>
           </div>
         </section>
 
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
             <div>
-              <h2>Shipments / Tracking Numbers</h2>
+              <h2>Shipments</h2>
+
               <p>
-                All shipment records associated with this customer.
+                Customer shipments currently assigned to this
+                container.
               </p>
             </div>
-            <Link
-              href={`/customers/${customer.id}/shipments/new`}
-              className={styles.newShipmentButton}
-            >
-              + New Shipment
-            </Link>
-
           </div>
 
-          {customer.shipments.length === 0 ? (
+          {container.shipments.length === 0 ? (
             <div className={styles.emptyState}>
-              No shipments have been recorded for this customer.
+              No shipments are currently assigned to this container.
             </div>
           ) : (
             <div className={styles.tableWrapper}>
               <table className={styles.table}>
                 <thead>
                   <tr>
+                    <th>Customer</th>
                     <th>Tracking</th>
                     <th>Description</th>
-                    <th>Mode</th>
                     <th>Status</th>
-                    <th>Container</th>
                     <th>Received</th>
                     <th>Actual CBM</th>
                     <th>Chargeable CBM</th>
-                    <th>Financials</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {customer.shipments.map((shipment) => (
+                  {container.shipments.map((shipment) => (
                     <tr key={shipment.id}>
+                      <td>
+                        <Link
+                          href={`/customers/${shipment.customer.id}`}
+                          className={styles.customerLink}
+                        >
+                          {shipment.customer.name}
+                        </Link>
+                      </td>
+
                       <td>
                         <strong>
                           {shipment.trackingNumber ??
@@ -160,17 +212,10 @@ export default async function CustomerPage({
                         {shipment.description ?? "Not provided"}
                       </td>
 
-                      <td>{shipment.shippingMode}</td>
-
                       <td>
                         <span className={styles.status}>
                           {formatStatus(shipment.status)}
                         </span>
-                      </td>
-
-                      <td>
-                        {shipment.container?.containerNumber ??
-                          "Not assigned"}
                       </td>
 
                       <td>
@@ -190,16 +235,6 @@ export default async function CustomerPage({
                           ? shipment.chargeableCbm.toString()
                           : "—"}
                       </td>
-
-                      <td>
-                        <Link
-                          href={`/shipments/${shipment.id}/pricing`}
-                          className={styles.pricingLink}
-                        >
-                          Price Shipment
-                        </Link>
-                      </td>
-
                     </tr>
                   ))}
                 </tbody>
@@ -207,27 +242,6 @@ export default async function CustomerPage({
             </div>
           )}
         </section>
-
-        <InvoiceReadyShipments
-          customerId={customer.id}
-          shipments={customer.shipments
-            .filter((shipment) => shipment.pricings.length > 0)
-            .map((shipment) => {
-              const pricing = shipment.pricings[0];
-
-              return {
-                shipmentId: shipment.id,
-                shipmentPricingId: pricing.id,
-                trackingNumber: shipment.trackingNumber,
-                shipmentNumber: shipment.shipmentNumber,
-                description: shipment.description,
-                customerChargeUsd:
-                  pricing.customerChargeUsd.toString(),
-                customerChargeGhs:
-                  pricing.customerChargeGhs.toString(),
-              };
-            })}
-        />
       </div>
     </main>
   );

@@ -1,0 +1,168 @@
+.page {
+  min-height: 100vh;
+  padding: 48px 24px;
+  background: #f6f6f6;
+  color: #111111;
+}
+
+.container {
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #f97316;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: #666666;
+}
+
+.primaryButton {
+  display: inline-block;
+  padding: 11px 16px;
+  border-radius: 8px;
+  background: #f97316;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.primaryButton:hover {
+  background: #ea580c;
+}
+
+.containerList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.containerCard {
+  display: block;
+  padding: 24px;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #111111;
+  text-decoration: none;
+}
+
+.containerCard:hover {
+  border-color: #f97316;
+}
+
+.mainInfo {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.mainInfo h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.mainInfo p {
+  margin: 0;
+  color: #666666;
+}
+
+.shipmentCount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.shipmentCount strong {
+  font-size: 22px;
+}
+
+.shipmentCount span {
+  color: #777777;
+  font-size: 12px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #eeeeee;
+}
+
+.metrics div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.metrics span {
+  color: #777777;
+  font-size: 12px;
+}
+
+.metrics strong {
+  font-size: 14px;
+}
+
+.emptyState {
+  padding: 40px;
+  border: 1px dashed #cccccc;
+  border-radius: 12px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.emptyState h2 {
+  margin-top: 0;
+}
+
+.emptyState p {
+  color: #666666;
+}
+
+@media (max-width: 800px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .mainInfo {
+    flex-direction: column;
+  }
+
+  .shipmentCount {
+    align-items: flex-start;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}
