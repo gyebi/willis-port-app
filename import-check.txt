@@ -1,0 +1,538 @@
+
+--- IMPORT SUMMARY ---
+Candidate shipments: 583
+Unique customer names: 122
+Without customer name: 17
+Without tracking number: 70
+SEA: 292
+AIR: 63
+UNKNOWN shipping mode: 228
+Assigned to container: 59
+Duplicate tracking numbers: 21
+Duplicate tracking examples: [
+  'YT7628451803674',
+  'YT7628304177273',
+  '79013041339193',
+  '79012986844413',
+  'YT7628767335010',
+  'YT2589901866908',
+  'YT7628753538054',
+  'YT7629812131348',
+  'YT7630508598675',
+  '79119671031160'
+]
+
+--- DUPLICATE TRACKING DETAILS ---
+
+Tracking: YT7628451803674
+{
+  sheet: 'Sheet1',
+  customer: 'Akua',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-20T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7628451803674'
+}
+{
+  sheet: 'Sheet1',
+  customer: 'Akua',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-22T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7628451803674'
+}
+
+Tracking: YT7628304177273
+{
+  sheet: 'Sheet1',
+  customer: 'Akua',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-20T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7628304177273'
+}
+{
+  sheet: 'Sheet1',
+  customer: null,
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-27T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7628304177273'
+}
+
+Tracking: 79013041339193
+{
+  sheet: 'Sheet1',
+  customer: 'Akua',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-20T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79013041339193'
+}
+{
+  sheet: 'Sheet1',
+  customer: null,
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-27T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79013041339193'
+}
+
+Tracking: 79012986844413
+{
+  sheet: 'Sheet1',
+  customer: 'Akua',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-20T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79012986844413'
+}
+{
+  sheet: 'Sheet1',
+  customer: null,
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-27T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79012986844413'
+}
+
+Tracking: YT7628767335010
+{
+  sheet: 'Sheet1',
+  customer: 'Priscilla Kpodo',
+  description: '[not recevied]',
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-24T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7628767335010'
+}
+{
+  sheet: 'Sheet1',
+  customer: null,
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-27T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7628767335010'
+}
+
+Tracking: YT2589901866908
+{
+  sheet: 'Sheet1',
+  customer: 'Priscilla Kpodo',
+  description: '[not recevied]',
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-24T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT2589901866908'
+}
+{
+  sheet: 'Sheet1',
+  customer: null,
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-27T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT2589901866908'
+}
+
+Tracking: YT7628753538054
+{
+  sheet: 'Sheet1',
+  customer: 'Priscilla Kpodo',
+  description: '[not recevied]',
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-24T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7628753538054'
+}
+{
+  sheet: 'Sheet1',
+  customer: null,
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-27T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7628753538054'
+}
+
+Tracking: YT7629812131348
+{
+  sheet: 'Sheet1',
+  customer: 'Tilly Bamfo',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-06-27T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7629812131348'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Tilly Bamfo',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-03T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7629812131348'
+}
+
+Tracking: YT7630508598675
+{
+  sheet: 'Sheet2',
+  customer: 'Patience Love',
+  description: '1 pack 2 phones',
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-03T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7630508598675'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'XS',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-06T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7630508598675'
+}
+
+Tracking: 79119671031160
+{
+  sheet: 'Sheet2',
+  customer: 'Speedlimit Global',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-06T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79119671031160'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Speedlimit Global',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-07T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79119671031160'
+}
+
+Tracking: 79016380814256
+{
+  sheet: 'Sheet2',
+  customer: 'Fiagbedzi Winifred',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-06T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79016380814256'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Mr. Alex',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-07T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79016380814256'
+}
+
+Tracking: 79016374491703
+{
+  sheet: 'Sheet2',
+  customer: 'Patience Love',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-06T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79016374491703'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Patience Love',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-07T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79016374491703'
+}
+
+Tracking: ZY20245798676
+{
+  sheet: 'Sheet2',
+  customer: 'Henry Mark Yalley',
+  description: '2Box speakers',
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-08T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'ZY20245798676'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Emmanuel Amo Afrah',
+  description: '1 box',
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-09T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'ZY20245798676'
+}
+
+Tracking: 79122144608006
+{
+  sheet: 'Sheet2',
+  customer: 'Foster',
+  description: 'cloths',
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-14T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79122144608006'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Foster',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-14T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79122144608006'
+}
+
+Tracking: 73716851816871
+{
+  sheet: 'Sheet2',
+  customer: 'Romeo',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-13T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '73716851816871'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Romeo',
+  description: null,
+  shippingMode: 'SEA',
+  dateReceived: 2026-07-16T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '73716851816871'
+}
+
+Tracking: YT7633577072352
+{
+  sheet: 'Sheet2',
+  customer: 'Bismark Dankwah',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-07-20T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7633577072352'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Bismark Dankwah',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-07-20T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'YT7633577072352'
+}
+
+Tracking: 79123053326984
+{
+  sheet: 'Sheet2',
+  customer: 'Unknown',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-07-20T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79123053326984'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Unknown',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-07-20T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79123053326984'
+}
+
+Tracking: 435280487928874
+{
+  sheet: 'Sheet2',
+  customer: 'Unknown',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-07-24T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '435280487928874'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Unknown',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-07-24T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '435280487928874'
+}
+
+Tracking: 79128871451245
+{
+  sheet: 'Sheet2',
+  customer: 'speed limit',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-08-08T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79128871451245'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'speed limit',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-08-08T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '79128871451245'
+}
+
+Tracking: 777433709160075
+{
+  sheet: 'Sheet2',
+  customer: 'BIG GOD',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-08-10T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '777433709160075'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'BIG GOD',
+  description: null,
+  shippingMode: 'AIR',
+  dateReceived: 2026-08-12T00:00:00.000Z,
+  container: null,
+  shipmentNumber: '777433709160075'
+}
+
+Tracking: DPK212587149792
+{
+  sheet: 'Sheet2',
+  customer: 'Johnson Andy',
+  description: null,
+  shippingMode: 'UNKNOWN',
+  dateReceived: 2026-08-08T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'DPK212587149792'
+}
+{
+  sheet: 'Sheet2',
+  customer: 'Johnson Adu Nyarko',
+  description: null,
+  shippingMode: 'AIR',
+  dateReceived: 2026-08-13T00:00:00.000Z,
+  container: null,
+  shipmentNumber: 'DPK212587149792'
+}
+Loaded 583 candidate shipment rows from WILLISPORT TRACKER.xlsx
+[
+  {
+    "sheetName": "Sheet1",
+    "customerName": "JOSHUA NAKPRI",
+    "trackingNumber": null,
+    "description": "STUDIO EQUIPMENTS",
+    "goodsType": "Electronics",
+    "shippingMode": "UNKNOWN",
+    "status": "WAREHOUSE",
+    "weightKg": null,
+    "declaredCbm": null,
+    "actualCbm": 0.15,
+    "chargeableCbm": 0.2,
+    "dateReceived": "2026-04-02T00:00:00.000Z",
+    "estimatedLoadingDate": "2026-04-11T00:00:00.000Z",
+    "eta": "2026-06-10T00:00:00.000Z",
+    "containerNumber": "CONTAINER1",
+    "shipmentNumber": "IMP-SHEET1-00001"
+  },
+  {
+    "sheetName": "Sheet1",
+    "customerName": "HAMIDA NAA DENSUA",
+    "trackingNumber": null,
+    "description": "BAGS",
+    "goodsType": "Normal",
+    "shippingMode": "UNKNOWN",
+    "status": "WAREHOUSE",
+    "weightKg": null,
+    "declaredCbm": null,
+    "actualCbm": 0.0314,
+    "chargeableCbm": 0.15,
+    "dateReceived": "2026-04-18T00:00:00.000Z",
+    "estimatedLoadingDate": "2026-04-25T00:00:00.000Z",
+    "eta": "2026-06-24T00:00:00.000Z",
+    "containerNumber": "CONTAINER2",
+    "shipmentNumber": "IMP-SHEET1-00002"
+  },
+  {
+    "sheetName": "Sheet1",
+    "customerName": "EMMANUEL OSAFO",
+    "trackingNumber": null,
+    "description": "WASHING MACHINE",
+    "goodsType": "Electronics",
+    "shippingMode": "UNKNOWN",
+    "status": "WAREHOUSE",
+    "weightKg": null,
+    "declaredCbm": null,
+    "actualCbm": 0.27,
+    "chargeableCbm": 0.27,
+    "dateReceived": "2026-04-21T00:00:00.000Z",
+    "estimatedLoadingDate": "2026-05-02T00:00:00.000Z",
+    "eta": "2026-07-01T00:00:00.000Z",
+    "containerNumber": "CONTAINER3",
+    "shipmentNumber": "IMP-SHEET1-00003"
+  },
+  {
+    "sheetName": "Sheet1",
+    "customerName": "AWAL KUMASI",
+    "trackingNumber": null,
+    "description": "MATRESS",
+    "goodsType": "Normal",
+    "shippingMode": "UNKNOWN",
+    "status": "WAREHOUSE",
+    "weightKg": null,
+    "declaredCbm": null,
+    "actualCbm": 0.27,
+    "chargeableCbm": 0.27,
+    "dateReceived": "2026-04-21T00:00:00.000Z",
+    "estimatedLoadingDate": "2026-05-02T00:00:00.000Z",
+    "eta": "2026-07-01T00:00:00.000Z",
+    "containerNumber": "CONTAINER3",
+    "shipmentNumber": "IMP-SHEET1-00004"
+  },
+  {
+    "sheetName": "Sheet1",
+    "customerName": "AWAL KUMASI",
+    "trackingNumber": null,
+    "description": "BED SHEETS",
+    "goodsType": "Normal",
+    "shippingMode": "UNKNOWN",
+    "status": "WAREHOUSE",
+    "weightKg": null,
+    "declaredCbm": null,
+    "actualCbm": 0.0831,
+    "chargeableCbm": 0.15,
+    "dateReceived": "2026-04-28T00:00:00.000Z",
+    "estimatedLoadingDate": "2026-05-09T00:00:00.000Z",
+    "eta": "2026-07-08T00:00:00.000Z",
+    "containerNumber": "CONTAINER4",
+    "shipmentNumber": "IMP-SHEET1-00005"
+  }
+]

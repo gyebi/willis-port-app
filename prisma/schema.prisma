@@ -92,3 +92,109 @@ model BusinessSettings {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum ShippingMode {
+  SEA
+  AIR
+  UNKNOWN
+}
+
+enum ShipmentStatus {
+  RECEIVED
+  ORIGIN
+  LOADING_SCHEDULED
+  IN_TRANSIT
+  CUSTOMS_CLEARANCE
+  WAREHOUSE
+  DELIVERED
+  CANCELLED
+}
+
+enum ContainerStatus {
+  PLANNING
+  LOADING
+  IN_TRANSIT
+  CUSTOMS_CLEARANCE
+  ARRIVED
+  CLOSED
+  CANCELLED
+}
+
+model Customer {
+  id String @id @default(cuid())
+
+  name     String
+  phone    String?
+  whatsapp String?
+  email    String?
+  address  String?
+
+  shipments Shipment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([phone])
+}
+
+model Container {
+  id String @id @default(cuid())
+
+  containerNumber String @unique
+
+  shippingMode ShippingMode
+
+  estimatedLoadingDate DateTime?
+  departureDate        DateTime?
+  eta                  DateTime?
+  actualArrivalDate    DateTime?
+
+  status ContainerStatus @default(PLANNING)
+
+  notes String?
+
+  shipments Shipment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Shipment {
+  id             String @id @default(cuid())
+  shipmentNumber String @unique
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  trackingNumber String?
+
+  description String?
+
+  shippingMode ShippingMode
+  goodsType    String?
+
+  weightKg Decimal?
+
+  declaredCbm   Decimal?
+  actualCbm     Decimal?
+  chargeableCbm Decimal?
+
+  dateReceived         DateTime?
+  estimatedLoadingDate DateTime?
+  eta                  DateTime?
+
+  status ShipmentStatus @default(RECEIVED)
+
+  containerId String?
+  container   Container? @relation(fields: [containerId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([trackingNumber])
+  @@index([containerId])
+  @@index([status])
+  @@index([eta])
+}
