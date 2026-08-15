@@ -83,26 +83,40 @@ model InvoiceLine {
   invoiceId String
   invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
-  shipmentId String
-  shipment   Shipment @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
+  lineType InvoiceLineType
 
-  shipmentPricingId String
-  shipmentPricing   ShipmentPricing @relation(fields: [shipmentPricingId], references: [id], onDelete: Restrict)
+  shipmentId String?
+  shipment   Shipment? @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
 
-  description String?
+  shipmentPricingId String?
+  shipmentPricing   ShipmentPricing? @relation(fields: [shipmentPricingId], references: [id], onDelete: Restrict)
 
-  pricingBasis ShipmentPricingBasis
+  description String
+
+  pricingBasis ShipmentPricingBasis?
 
   billableQuantity Decimal?
   unitRateUsd      Decimal?
-  lineTotalUsd     Decimal
-  lineTotalGhs     Decimal
+
+  lineTotalUsd Decimal
+  lineTotalGhs Decimal
 
   createdAt DateTime @default(now())
 
   @@index([invoiceId])
   @@index([shipmentId])
   @@index([shipmentPricingId])
+  @@index([lineType])
+}
+
+enum InvoiceLineType {
+  SHIPMENT
+  FREIGHT
+  HANDLING
+  DOCUMENTATION
+  SPECIAL_HANDLING
+  DELIVERY
+  OTHER
 }
 
 enum PricingBasis {
@@ -299,3 +313,4 @@ model ShipmentPricing {
   @@index([status])
   @@index([pricingBasis])
 }
+

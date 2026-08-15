@@ -84,11 +84,14 @@ export async function POST(
           id: {
             in: shipmentPricingIds,
           },
+
           status: "APPROVED",
+
           shipment: {
             customerId,
           },
         },
+
         include: {
           shipment: true,
         },
@@ -146,11 +149,15 @@ export async function POST(
 
             lines: {
               create: pricingRecords.map((pricing) => ({
+                lineType: "SHIPMENT",
+
                 shipmentId: pricing.shipmentId,
                 shipmentPricingId: pricing.id,
 
                 description:
-                  pricing.shipment.description,
+                  pricing.shipment.description ??
+                  pricing.shipment.trackingNumber ??
+                  pricing.shipment.shipmentNumber,
 
                 pricingBasis:
                   pricing.pricingBasis,
@@ -158,8 +165,7 @@ export async function POST(
                 billableQuantity:
                   pricing.billableQuantity,
 
-                unitRateUsd:
-                  pricing.unitRateUsd,
+                unitRateUsd: pricing.unitRateUsd,
 
                 lineTotalUsd:
                   pricing.customerChargeUsd,
@@ -180,10 +186,10 @@ export async function POST(
       {
         ok: true,
         message: "Invoice created.",
+
         invoice: {
           id: invoice.id,
-          invoiceNumber:
-            invoice.invoiceNumber,
+          invoiceNumber: invoice.invoiceNumber,
         },
       },
       {
@@ -191,10 +197,7 @@ export async function POST(
       }
     );
   } catch (error) {
-    console.error(
-      "Failed to create customer invoice:",
-      error
-    );
+    console.error("Failed to create customer invoice:", error);
 
     return NextResponse.json(
       {
