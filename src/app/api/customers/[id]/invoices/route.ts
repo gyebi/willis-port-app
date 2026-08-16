@@ -122,12 +122,9 @@ export async function POST(
 
             const baseChargeUsd =
               pricing.pricingBasis === "MANUAL"
-                ? pricing.manualChargeUsd
-                : pricing.billableQuantity &&
-                    pricing.unitRateUsd
-                  ? pricing.billableQuantity.mul(
-                      pricing.unitRateUsd
-                    )
+                ? pricing.manualChargeUsd ?? new Prisma.Decimal(0)
+                : pricing.billableQuantity && pricing.unitRateUsd
+                  ? pricing.billableQuantity.mul(pricing.unitRateUsd)
                   : new Prisma.Decimal(0);
 
             const baseChargeGhs =

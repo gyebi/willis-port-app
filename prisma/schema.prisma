@@ -39,7 +39,15 @@ model CustomerRequest {
   status           RequestStatus @default(NEW)
   updatedAt        DateTime      @updatedAt
 
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  shipmentId String?   @unique
+  shipment   Shipment? @relation(fields: [shipmentId], references: [id], onDelete: Restrict)
+
   invoice Invoice?
+
+  @@index([customerId])
 }
 
 model Invoice {
@@ -180,6 +188,7 @@ model Customer {
 
   shipments Shipment[]
   invoices  Invoice[]
+  requests  CustomerRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -239,11 +248,12 @@ model Shipment {
   containerId String?
   container   Container? @relation(fields: [containerId], references: [id], onDelete: SetNull)
 
-  pricings     ShipmentPricing[]
-  invoiceLines InvoiceLine[]
+  pricings        ShipmentPricing[]
+  invoiceLines    InvoiceLine[]
+  customerRequest CustomerRequest?
 
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([customerId])
   @@index([trackingNumber])

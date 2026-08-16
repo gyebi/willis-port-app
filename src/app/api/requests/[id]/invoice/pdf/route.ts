@@ -32,7 +32,7 @@ export async function GET(
 
   const pdfBytes = await buildInvoicePdf(invoiceData);
 
-  return new Response(pdfBytes, {
+  return new Response(Buffer.from(pdfBytes), {
     status: 200,
     headers: buildPdfHeaders(invoiceData.invoice.invoiceNumber),
   });
