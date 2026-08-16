@@ -1,6 +1,13 @@
 import { z } from "zod";
 
 export const requestSchema = z.object({
+  customerId: z
+    .string()
+    .trim()
+    .min(1)
+    .nullable()
+    .optional(),
+
   customerName: z
     .string()
     .trim()

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FormEvent, useState } from "react";
@@ -7,6 +6,70 @@ import styles from "./page.module.css";
 export default function NewRequestPage() {
     const [statusMessage, setStatusMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    type CustomerSearchResult = {
+        id: string;
+        name: string;
+        phone: string | null;
+        whatsapp: string | null;
+        email: string | null;
+        address: string | null;
+        _count: {
+            shipments: number;
+        };
+    };
+
+    const [customerSearch, setCustomerSearch] = useState("");
+    const [customerResults, setCustomerResults] =
+        useState<CustomerSearchResult[]>([]);
+    const [selectedCustomer, setSelectedCustomer] =
+        useState<CustomerSearchResult | null>(null);
+    const [isSearching, setIsSearching] = useState(false);
+
+
+    async function handleCustomerSearch() {
+        const query = customerSearch.trim();
+
+        if (query.length < 2) {
+            setStatusMessage(
+                "Enter at least 2 characters to search."
+            );
+            return;
+        }
+
+        try {
+            setIsSearching(true);
+            setStatusMessage("");
+
+            const response = await fetch(
+                `/api/customers/search?q=${encodeURIComponent(query)}`
+            );
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                setStatusMessage(
+                    result.message ?? "Unable to search customers."
+                );
+                return;
+            }
+
+            setCustomerResults(result.customers);
+        } catch {
+            setStatusMessage("Unable to search customers.");
+        } finally {
+            setIsSearching(false);
+        }
+    }
+
+
+    function selectCustomer(customer: CustomerSearchResult) {
+        setSelectedCustomer(customer);
+        setCustomerResults([]);
+        setCustomerSearch("");
+        setStatusMessage("");
+    }
+
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -19,6 +82,7 @@ export default function NewRequestPage() {
         const formData = new FormData(form);
 
         const requestData = {
+            customerId: selectedCustomer?.id ?? null,
             customerName: String(formData.get("customerName") ?? ""),
             phone: String(formData.get("phone") ?? ""),
             email: String(formData.get("email") ?? ""),
@@ -87,7 +151,8 @@ export default function NewRequestPage() {
                 <form
                     className={styles.form}
                     onSubmit={handleSubmit}
-                >                    <section className={styles.section}>
+                >
+                    <section className={styles.section}>
                         <div className={styles.sectionTitle}>
                             <span>1</span>
 
@@ -97,6 +162,67 @@ export default function NewRequestPage() {
                             </div>
                         </div>
 
+                        <div style={{ marginBottom: "24px" }}>
+                            <label>
+                                Find Existing Customer
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        gap: "10px",
+                                        marginTop: "8px",
+                                    }}
+                                >
+                                    <input
+                                        type="text"
+                                        value={customerSearch}
+                                        placeholder="Search name, phone or email"
+                                        onChange={(event) =>
+                                            setCustomerSearch(event.target.value)
+                                        }
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={handleCustomerSearch}
+                                        disabled={isSearching}
+                                    >
+                                        {isSearching ? "Searching..." : "Search"}
+                                    </button>
+                                </div>
+                            </label>
+
+                            {customerResults.length > 0 && (
+                                <div style={{ marginTop: "10px" }}>
+                                    {customerResults.map((customer) => (
+                                        <button
+                                            key={customer.id}
+                                            type="button"
+                                            onClick={() => selectCustomer(customer)}
+                                            style={{
+                                                width: "100%",
+                                                textAlign: "left",
+                                                padding: "12px",
+                                                marginBottom: "6px",
+                                            }}
+                                        >
+                                            <strong>{customer.name}</strong>
+                                            {" — "}
+                                            {customer.phone ?? "No phone"}
+                                            {" — "}
+                                            {customer._count.shipments} shipment(s)
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {selectedCustomer && (
+                                <p>
+                                    Existing customer selected:{" "}
+                                    <strong>{selectedCustomer.name}</strong>
+                                </p>
+                            )}
+                        </div>
+
                         <div className={styles.grid}>
                             <label>
                                 Customer Name
@@ -104,6 +230,9 @@ export default function NewRequestPage() {
                                     type="text"
                                     name="customerName"
                                     placeholder="Enter customer name"
+                                    defaultValue={selectedCustomer?.name ?? ""}
+                                    key={selectedCustomer?.id ?? "new-name"}
+                                    readOnly={Boolean(selectedCustomer)}
                                     required
                                 />
                             </label>
@@ -114,6 +243,9 @@ export default function NewRequestPage() {
                                     type="tel"
                                     name="phone"
                                     placeholder="+233..."
+                                    defaultValue={selectedCustomer?.phone ?? ""}
+                                    key={`${selectedCustomer?.id ?? "new"}-phone`}
+                                    readOnly={Boolean(selectedCustomer)}
                                     required
                                 />
                             </label>
@@ -124,6 +256,9 @@ export default function NewRequestPage() {
                                     type="email"
                                     name="email"
                                     placeholder="customer@example.com"
+                                    defaultValue={selectedCustomer?.email ?? ""}
+                                    key={`${selectedCustomer?.id ?? "new"}-email`}
+                                    readOnly={Boolean(selectedCustomer)}
                                 />
                             </label>
 
