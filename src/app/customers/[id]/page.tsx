@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import InvoiceReadyShipments from "./InvoiceReadyShipments";
 import styles from "./page.module.css";
 
+export const dynamic = "force-dynamic";
+
 type CustomerPageProps = {
   params: Promise<{
     id: string;

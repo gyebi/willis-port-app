@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 
 import styles from "./page.module.css";
 
+export const dynamic = "force-dynamic";
+
 type ContainerPageProps = {
   params: Promise<{
     id: string;

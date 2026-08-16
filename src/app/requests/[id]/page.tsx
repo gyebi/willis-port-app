@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
 import InvoicePanel from "./InvoicePanel";
 
+export const dynamic = "force-dynamic";
+
 type RequestDetailsPageProps = {
     params: Promise<{
         id: string;

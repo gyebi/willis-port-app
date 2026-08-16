@@ -10,6 +10,8 @@ import InvoiceActions from "./InvoiceActions";
 
 import styles from "./page.module.css";
 
+export const dynamic = "force-dynamic";
+
 type InvoicePageProps = {
   params: Promise<{
     id: string;
@@ -136,5 +138,4 @@ export default async function InvoicePage({
     </main>
   );
 }
-
 

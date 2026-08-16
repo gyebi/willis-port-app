@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import PricingForm from "./PricingForm";
 import styles from "./page.module.css";
 
+export const dynamic = "force-dynamic";
+
 type PricingPageProps = {
   params: Promise<{
     id: string;
