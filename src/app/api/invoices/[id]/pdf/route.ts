@@ -253,8 +253,15 @@ export async function GET(
       340,
       y
     );
+	y-=18;
 
-    y -= 18;
+	drawText(
+  `Valid Until: ${invoice.validUntil.toLocaleDateString("en-GB")}`,
+  340,
+  y
+);
+
+y -= 24;
 
     if (invoice.customer.phone) {
       drawText(

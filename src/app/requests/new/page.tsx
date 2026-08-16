@@ -1,11 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import styles from "./page.module.css";
+
 
 export default function NewRequestPage() {
     const [statusMessage, setStatusMessage] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const router = useRouter();
 
     type CustomerSearchResult = {
         id: string;
@@ -125,7 +128,7 @@ export default function NewRequestPage() {
                 `Request saved successfully: ${result.requestNumber}`
             );
 
-            form.reset();
+            router.push(`/customers/${result.customerId}`);
         } catch {
             setStatusMessage(
                 "Something went wrong while saving the request."
