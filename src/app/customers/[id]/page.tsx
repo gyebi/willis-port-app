@@ -138,7 +138,7 @@ export default async function CustomerPage({
                     <th>Received</th>
                     <th>Actual CBM</th>
                     <th>Chargeable CBM</th>
-                    <th>Financials</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
@@ -146,10 +146,12 @@ export default async function CustomerPage({
                   {customer.shipments.map((shipment) => (
                     <tr key={shipment.id}>
                       <td>
-                        <strong>
-                          {shipment.trackingNumber ??
-                            shipment.shipmentNumber}
-                        </strong>
+                        <Link href={`/shipments/${shipment.id}`}>
+                          <strong>
+                            {shipment.trackingNumber ??
+                              shipment.shipmentNumber}
+                          </strong>
+                        </Link>
 
                         {shipment.trackingNumber && (
                           <small>
@@ -194,12 +196,27 @@ export default async function CustomerPage({
                       </td>
 
                       <td>
-                        <Link
-                          href={`/shipments/${shipment.id}/pricing`}
-                          className={styles.pricingLink}
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "1rem",
+                            flexWrap: "wrap",
+                          }}
                         >
-                          Price Shipment
-                        </Link>
+                          <Link
+                            href={`/shipments/${shipment.id}`}
+                            className={styles.pricingLink}
+                          >
+                            Edit Shipment
+                          </Link>
+
+                          <Link
+                            href={`/shipments/${shipment.id}/pricing`}
+                            className={styles.pricingLink}
+                          >
+                            Price Shipment
+                          </Link>
+                        </div>
                       </td>
 
                     </tr>

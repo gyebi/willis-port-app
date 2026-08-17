@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import ShipmentFields from "./ShipmentFields";
 import styles from "./page.module.css";
 
 type NewShipmentFormProps = {
@@ -74,104 +74,7 @@ export default function NewShipmentForm({
       className={styles.form}
       onSubmit={handleSubmit}
     >
-      <div className={styles.grid}>
-        <div>
-          <label htmlFor="trackingNumber">
-            Tracking Number
-          </label>
-
-          <input
-            id="trackingNumber"
-            name="trackingNumber"
-            type="text"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="shippingMode">
-            Shipping Mode
-          </label>
-
-          <select
-            id="shippingMode"
-            name="shippingMode"
-            defaultValue="UNKNOWN"
-          >
-            <option value="UNKNOWN">
-              Not yet known
-            </option>
-
-            <option value="SEA">Sea</option>
-
-            <option value="AIR">Air</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="goodsType">
-            Goods Type
-          </label>
-
-          <input
-            id="goodsType"
-            name="goodsType"
-            type="text"
-            placeholder="Normal, Electronics..."
-          />
-        </div>
-
-        <div>
-          <label htmlFor="dateReceived">
-            Date Received
-          </label>
-
-          <input
-            id="dateReceived"
-            name="dateReceived"
-            type="date"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="weightKg">
-            Weight (kg)
-          </label>
-
-          <input
-            id="weightKg"
-            name="weightKg"
-            type="number"
-            min="0"
-            step="0.001"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="declaredCbm">
-            CBM
-          </label>
-
-          <input
-            id="declaredCbm"
-            name="declaredCbm"
-            type="number"
-            min="0"
-            step="0.0001"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="description">
-          Description
-        </label>
-
-        <textarea
-          id="description"
-          name="description"
-          rows={4}
-        />
-      </div>
+      <ShipmentFields gridClassName={styles.grid} />
 
       {error && (
         <p className={styles.error}>{error}</p>
