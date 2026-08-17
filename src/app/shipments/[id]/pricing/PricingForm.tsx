@@ -85,8 +85,16 @@ export default function PricingForm({
 
   const isApproved = pricingStatus === "APPROVED";
 
+  const hasRequiredPricingInput =
+    pricingBasis === "CBM"
+      ? Number(chargeableCbm || 0) > 0
+      : pricingBasis === "KG"
+        ? Number(chargeableWeightKg || 0) > 0
+        : Number(manualChargeUsd || 0) > 0;
+
   const preview = useMemo(() => {
     const exchangeRate = Number(exchangeRateToGhs || 0);
+
     const extraChargesUsd =
       Number(freightChargeUsd || 0) +
       Number(handlingChargeUsd || 0) +
@@ -98,6 +106,10 @@ export default function PricingForm({
     if (pricingBasis === "CBM") {
       const quantity = Number(chargeableCbm || 0);
       const rate = Number(unitRateUsd || 0);
+
+      if (quantity <= 0 || rate <= 0) {
+        return null;
+      }
 
       const baseUsd = quantity * rate;
       const totalUsd = baseUsd + extraChargesUsd;
@@ -113,6 +125,10 @@ export default function PricingForm({
       const quantity = Number(chargeableWeightKg || 0);
       const rate = Number(unitRateUsd || 0);
 
+      if (quantity <= 0 || rate <= 0) {
+        return null;
+      }
+
       const baseUsd = quantity * rate;
       const totalUsd = baseUsd + extraChargesUsd;
 
@@ -124,6 +140,11 @@ export default function PricingForm({
     }
 
     const baseUsd = Number(manualChargeUsd || 0);
+
+    if (baseUsd <= 0) {
+      return null;
+    }
+
     const totalUsd = baseUsd + extraChargesUsd;
 
     return {
@@ -384,7 +405,7 @@ export default function PricingForm({
             onChange={(event) =>
               setManualChargeUsd(event.target.value)
             }
-            />
+          />
         </div>
       )}
 
@@ -554,13 +575,21 @@ export default function PricingForm({
       <div className={styles.totalBox}>
         <span>Preview Customer Charge</span>
 
-        <strong>
-          ${preview.usd.toFixed(2)} USD
-        </strong>
+        {preview ? (
+          <>
+            <strong>
+              ${preview.usd.toFixed(2)} USD
+            </strong>
 
-        <small>
-          GHS {preview.ghs.toFixed(2)}
-        </small>
+            <small>
+              GHS {preview.ghs.toFixed(2)}
+            </small>
+          </>
+        ) : (
+          <small>
+            Enter the required pricing quantity and rate to calculate the customer charge.
+          </small>
+        )}
       </div>
 
       {message && (
@@ -575,7 +604,12 @@ export default function PricingForm({
         {!isApproved && (
           <button
             type="submit"
-            disabled={isSaving || isApproving}
+            disabled={
+              isSaving ||
+              isApproving ||
+              !hasRequiredPricingInput ||
+              !preview
+            }
           >
             {isSaving
               ? "Saving..."
