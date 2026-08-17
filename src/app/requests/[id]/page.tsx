@@ -21,8 +21,23 @@ export default async function RequestDetailsPage({
         where: {
             id,
         },
-        include: {
-            invoice: true,
+        select: {
+            id: true,
+            requestNumber: true,
+            customerName: true,
+            phone: true,
+            email: true,
+            requestSource: true,
+            shippingMethod: true,
+            goodsCategory: true,
+            weightKg: true,
+            volumeCbm: true,
+            goodsDescription: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+            customerId: true,
+            shipmentId: true,
         },
     });
 
@@ -135,17 +150,8 @@ export default async function RequestDetailsPage({
                 </section>
 
                 <InvoicePanel
-                    requestId={request.id}
-                    customerName={request.customerName}
-                    phone={request.phone}
-                    email={request.email}
-                    requestSource={request.requestSource}
-                    shippingMethod={request.shippingMethod}
-                    goodsCategory={request.goodsCategory}
-                    weightKg={request.weightKg?.toString() ?? null}
-                    volumeCbm={request.volumeCbm?.toString() ?? null}
-                    goodsDescription={request.goodsDescription}
-                    invoice={request.invoice}
+                    customerId={request.customerId}
+                    shipmentId={request.shipmentId}
                 />
             </div>
         </main >

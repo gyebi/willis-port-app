@@ -1,91 +1,43 @@
+import Link from "next/link";
 import styles from "./page.module.css";
-import GenerateInvoiceButton from "./GenerateInvoiceButton";
-import InvoiceHeader from "./invoice/InvoiceHeader";
-import CustomerSummary from "./invoice/CustomerSummary";
-import ShipmentSummary from "./invoice/ShipmentSummary";
-import InvoiceActions from "./invoice/InvoiceActions";
 
 type InvoicePanelProps = {
-  requestId: string;
-  customerName: string;
-  phone: string;
-  email: string | null;
-  requestSource: string;
-  shippingMethod: string;
-  goodsCategory: string;
-  weightKg: string | null;
-  volumeCbm: string | null;
-  goodsDescription: string;
-  invoice: {
-    invoiceNumber: string;
-    status: string;
-    currency: string;
-    exchangeRate: {
-      toString(): string;
-    };
-    subtotalUsd: {
-      toString(): string;
-    };
-    totalGhs: {
-      toString(): string;
-    };
-    validUntil: Date;
-  } | null;
+  customerId: string | null;
+  shipmentId: string | null;
 };
 
 export default function InvoicePanel({
-  requestId,
-  customerName,
-  phone,
-  email,
-  requestSource,
-  shippingMethod,
-  goodsCategory,
-  weightKg,
-  volumeCbm,
-  goodsDescription,
-  invoice,
+  customerId,
+  shipmentId,
 }: InvoicePanelProps) {
   return (
     <section className={styles.section}>
-      <h2>Invoice</h2>
+      <h2>Next Step</h2>
 
-      {invoice ? (
-        <>
-          <InvoiceHeader
-            invoiceNumber={invoice.invoiceNumber}
-            status={invoice.status}
-          />
-          <CustomerSummary
-            customerName={customerName}
-            phone={phone}
-            email={email}
-            requestSource={requestSource}
-          />
-          <ShipmentSummary
-            shippingMethod={shippingMethod}
-            goodsCategory={goodsCategory}
-            weightKg={weightKg}
-            volumeCbm={volumeCbm}
-            goodsDescription={goodsDescription}
-          />
-          <InvoiceActions
-            requestId={requestId}
-            customerPhone={phone}
-            customerEmail={email}
-          />
-        </>
-      ) : (
-        <div className={styles.emptyInvoiceState}>
-          <p>No invoice has been generated for this request yet.</p>
-        </div>
-      )}
+      <p>
+        Pricing and invoicing are managed from the shipment record.
+      </p>
 
       <div className={styles.actions}>
-        <GenerateInvoiceButton
-          requestId={requestId}
-          hasInvoice={Boolean(invoice)}
-        />
+        {shipmentId ? (
+          <Link
+            href={`/shipments/${shipmentId}/pricing`}
+            className={styles.invoiceButton}
+          >
+            Price Shipment
+          </Link>
+        ) : customerId ? (
+          <Link
+            href={`/customers/${customerId}`}
+            className={styles.invoiceButton}
+          >
+            Open Customer
+          </Link>
+        ) : (
+          <p>
+            This request is not yet linked to a customer or shipment.
+          </p>
+        )}
       </div>
     </section>
   );
