@@ -13,18 +13,18 @@ export default function InvoicePanel({
   return (
     <section className={styles.section}>
       <h2>Next Step</h2>
-
       <p>
         Pricing and invoicing are managed from the shipment record.
       </p>
 
       <div className={styles.actions}>
         {shipmentId ? (
+
           <Link
-            href={`/shipments/${shipmentId}/pricing`}
+            href={`/shipments/${shipmentId}`}
             className={styles.invoiceButton}
           >
-            Price Shipment
+            Open Shipment
           </Link>
         ) : customerId ? (
           <Link
