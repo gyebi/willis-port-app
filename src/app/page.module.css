@@ -61,14 +61,16 @@
 
 .card {
   padding: 24px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #d85f0b;
   border-radius: 12px;
   background: #ffffff;
+
 }
 
 .card p {
   margin: 0 0 14px;
-  color: #666666;
+  color: #d85f0b;
+  font-weight: 700;
 }
 
 .card strong {
@@ -79,7 +81,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 28px;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #d85f0b;
   border-radius: 12px;
   background: #ffffff;
 }
@@ -142,6 +144,7 @@
   align-items: center;
   padding: 18px 0;
   border-bottom: 1px solid #eeeeee;
+  
 }
 
 .requestRow:last-child {

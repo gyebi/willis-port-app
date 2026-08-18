@@ -9,11 +9,58 @@ export default async function Home() {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
-  const requestsToday = await prisma.customerRequest.count({
+ const now = new Date();
+
+const startOfMonth = new Date(
+  now.getFullYear(),
+  now.getMonth(),
+  1
+);
+
+const startOfNextMonth = new Date(
+  now.getFullYear(),
+  now.getMonth() + 1,
+  1
+);
+
+const requestsThisMonth =
+  await prisma.customerRequest.count({
     where: {
       createdAt: {
-        gte: startOfToday,
+        gte: startOfMonth,
+        lt: startOfNextMonth,
       },
+    },
+  });
+
+const invoicesIssuedThisMonth =
+  await prisma.invoice.count({
+    where: {
+      createdAt: {
+        gte: startOfMonth,
+        lt: startOfNextMonth,
+      },
+      status: {
+        in: [
+          "SENT",
+          "AWAITING_PAYMENT",
+          "PAID",
+        ],
+      },
+    },
+  });
+
+const awaitingPayment =
+  await prisma.invoice.count({
+    where: {
+      status: "AWAITING_PAYMENT",
+    },
+  });
+
+const paidInvoiceCount =
+  await prisma.invoice.count({
+    where: {
+      status: "PAID",
     },
   });
 
@@ -45,23 +92,23 @@ export default async function Home() {
 
       <section className={styles.stats}>
         <article className={styles.card}>
-          <p>Requests Today</p>
-          <strong>{requestsToday}</strong>
+          <p>Requests This Month</p>
+          <strong>{requestsThisMonth}</strong>
         </article>
 
         <article className={styles.card}>
-          <p>Invoices Sent</p>
-          <strong>0</strong>
+          <p>Invoices Issued This Month</p>
+          <strong>{invoicesIssuedThisMonth}</strong>
         </article>
 
         <article className={styles.card}>
           <p>Awaiting Payment</p>
-          <strong>0</strong>
+          <strong>{awaitingPayment}</strong>
         </article>
 
         <article className={styles.card}>
-          <p>Paid</p>
-          <strong>0</strong>
+          <p>Paid Invoices</p>
+          <strong>{paidInvoiceCount}</strong>
         </article>
       </section>
 
