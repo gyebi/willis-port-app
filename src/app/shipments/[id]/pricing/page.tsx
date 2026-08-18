@@ -57,6 +57,7 @@ export default async function PricingPage({
           <p>
             {shipment.customer.name} ·{" "}
             {shipment.trackingNumber ?? shipment.shipmentNumber}
+
           </p>
         </header>
 
@@ -110,22 +111,50 @@ export default async function PricingPage({
           weightKg={shipment.weightKg?.toString() ?? ""}
           actualCbm={shipment.actualCbm?.toString() ?? ""}
           chargeableCbm={shipment.chargeableCbm?.toString() ?? ""}
+
           latestPricing={
             latestPricing
               ? {
-                  id: latestPricing.id,
-                  status: latestPricing.status,
-                  pricingBasis: latestPricing.pricingBasis,
-                  chargeableWeightKg:
-                    latestPricing.chargeableWeightKg?.toString() ?? "",
-                  unitRateUsd:
-                    latestPricing.unitRateUsd?.toString() ?? "",
-                  manualChargeUsd:
-                    latestPricing.manualChargeUsd?.toString() ?? "",
-                  exchangeRateToGhs:
-                    latestPricing.exchangeRateToGhs.toString(),
-                  notes: latestPricing.notes ?? "",
-                }
+                id: latestPricing.id,
+                status: latestPricing.status,
+                pricingBasis: latestPricing.pricingBasis,
+
+                chargeableWeightKg:
+                  latestPricing.chargeableWeightKg?.toString() ?? "",
+
+                unitRateUsd:
+                  latestPricing.unitRateUsd?.toString() ?? "",
+
+                manualChargeUsd:
+                  latestPricing.manualChargeUsd?.toString() ?? "",
+
+                freightChargeUsd:
+                  latestPricing.freightChargeUsd?.toString() ?? "",
+
+                handlingChargeUsd:
+                  latestPricing.handlingChargeUsd?.toString() ?? "",
+
+                documentationChargeUsd:
+                  latestPricing.documentationChargeUsd?.toString() ?? "",
+
+                specialHandlingChargeUsd:
+                  latestPricing.specialHandlingChargeUsd?.toString() ?? "",
+
+                deliveryChargeUsd:
+                  latestPricing.deliveryChargeUsd?.toString() ?? "",
+
+                otherChargeDescription:
+                  latestPricing.otherChargeDescription ?? "",
+
+                otherChargeUsd:
+                  latestPricing.otherChargeUsd?.toString() ?? "",
+
+                exchangeRateToGhs:
+                  latestPricing.exchangeRateToGhs.toString(),
+
+                notes:
+                  latestPricing.notes ?? "",
+              }
               : null
           }
         />

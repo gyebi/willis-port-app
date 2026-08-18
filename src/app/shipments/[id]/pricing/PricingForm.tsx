@@ -16,13 +16,24 @@ type PricingFormProps = {
     id: string;
     status: "DRAFT" | "APPROVED" | "SUPERSEDED";
     pricingBasis: PricingBasis;
+
     chargeableWeightKg: string;
     unitRateUsd: string;
     manualChargeUsd: string;
+
+    freightChargeUsd: string;
+    handlingChargeUsd: string;
+    documentationChargeUsd: string;
+    specialHandlingChargeUsd: string;
+    deliveryChargeUsd: string;
+
+    otherChargeDescription: string;
+    otherChargeUsd: string;
+
     exchangeRateToGhs: string;
     notes: string;
   } | null;
-};
+}
 
 export default function PricingForm({
   shipmentId,
@@ -64,19 +75,39 @@ export default function PricingForm({
   >(latestPricing?.status ?? null);
 
   const [freightChargeUsd, setFreightChargeUsd] =
-    useState("");
+    useState(
+      latestPricing?.freightChargeUsd ?? ""
+    );
+
   const [handlingChargeUsd, setHandlingChargeUsd] =
-    useState("");
+    useState(
+      latestPricing?.handlingChargeUsd ?? ""
+    );
+
   const [documentationChargeUsd, setDocumentationChargeUsd] =
-    useState("");
+    useState(
+      latestPricing?.documentationChargeUsd ?? ""
+    );
+
   const [specialHandlingChargeUsd, setSpecialHandlingChargeUsd] =
-    useState("");
+    useState(
+      latestPricing?.specialHandlingChargeUsd ?? ""
+    );
+
   const [deliveryChargeUsd, setDeliveryChargeUsd] =
-    useState("");
+    useState(
+      latestPricing?.deliveryChargeUsd ?? ""
+    );
+
   const [otherChargeDescription, setOtherChargeDescription] =
-    useState("");
+    useState(
+      latestPricing?.otherChargeDescription ?? ""
+    );
+
   const [otherChargeUsd, setOtherChargeUsd] =
-    useState("");
+    useState(
+      latestPricing?.otherChargeUsd ?? ""
+    );
 
   const [isSaving, setIsSaving] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -91,6 +122,9 @@ export default function PricingForm({
       : pricingBasis === "KG"
         ? Number(chargeableWeightKg || 0) > 0
         : Number(manualChargeUsd || 0) > 0;
+
+  const hasValidExchangeRate =
+    Number(exchangeRateToGhs) > 0;
 
   const preview = useMemo(() => {
     const exchangeRate = Number(exchangeRateToGhs || 0);
@@ -277,6 +311,30 @@ export default function PricingForm({
       className={styles.section}
       onSubmit={handleSubmit}
     >
+      <div className={styles.summaryBox}>
+        <h3>Shipment Pricing Summary</h3>
+
+        <p>
+          Actual Weight:
+          <strong>
+            {weightKg || "0"} kg
+          </strong>
+        </p>
+
+        <p>
+          Actual CBM:
+          <strong>
+            {actualCbm || "0"}
+          </strong>
+        </p>
+
+        <p>
+          Chargeable CBM:
+          <strong>
+            {chargeableCbm || "0"}
+          </strong>
+        </p>
+      </div>
       <h2>Financial Calculation</h2>
 
       <div className={styles.grid}>
@@ -608,6 +666,7 @@ export default function PricingForm({
               isSaving ||
               isApproving ||
               !hasRequiredPricingInput ||
+              !hasValidExchangeRate ||
               !preview
             }
           >

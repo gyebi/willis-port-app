@@ -231,7 +231,12 @@ model Shipment {
   description String?
 
   shippingMode ShippingMode
-  goodsType    String?
+
+  serviceType ServiceType @default(STANDARD)
+
+  goodsCategory GoodsCategory @default(NORMAL)
+
+  goodsType String?
 
   weightKg Decimal?
 
@@ -272,6 +277,40 @@ enum ShipmentPricingStatus {
   DRAFT
   APPROVED
   SUPERSEDED
+}
+
+enum ServiceType {
+  STANDARD
+  EXPRESS
+}
+
+enum GoodsCategory {
+  NORMAL
+  SPECIAL
+}
+
+model ShippingRate {
+  id String @id @default(cuid())
+
+  shippingMode  ShippingMode
+  serviceType   ServiceType
+  goodsCategory GoodsCategory
+
+  pricingBasis ShipmentPricingBasis
+
+  rateUsd Decimal
+
+  unit String
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([shippingMode, serviceType, goodsCategory])
+  @@index([shippingMode])
+  @@index([serviceType])
+  @@index([goodsCategory])
 }
 
 model ShipmentPricing {

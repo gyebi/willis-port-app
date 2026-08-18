@@ -143,6 +143,17 @@ export async function GET(
       });
     }
 
+
+    function formatMoney(
+      value: string | number,
+      decimals = 2
+    ) {
+      return Number(value).toLocaleString("en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+    }
+
     function ensureSpace(requiredHeight: number) {
       if (y - requiredHeight > margin) {
         return;
@@ -261,6 +272,18 @@ export async function GET(
       y
     );
 
+    y -= 18;
+
+    drawText(
+      `Status: ${invoice.status}`,
+      340,
+      y,
+      {
+        size: 9,
+        bold: true,
+      }
+    );
+
     y -= 24;
 
     if (invoice.customer.phone) {
@@ -293,10 +316,160 @@ export async function GET(
     y -= 22;
 
     // --------------------------------------------------
+    // Shipment summary
+    // --------------------------------------------------
+
+    drawText("Shipment Summary", margin, y, {
+      size: 11,
+      bold: true,
+    });
+
+    y -= 18;
+
+    const shipmentSummaryMap = new Map<
+      string,
+      {
+        shipment: NonNullable<
+          (typeof invoice.lines)[number]["shipment"]
+        >;
+        pricingBasis: string | null;
+      }
+    >();
+
+    for (const line of invoice.lines) {
+      if (!line.shipment) {
+        continue;
+      }
+
+      const existing =
+        shipmentSummaryMap.get(line.shipment.id);
+
+      if (!existing) {
+        shipmentSummaryMap.set(line.shipment.id, {
+          shipment: line.shipment,
+          pricingBasis: line.pricingBasis,
+        });
+
+        continue;
+      }
+
+      // Some charge lines have no pricing basis.
+      // Keep the actual pricing basis when we find it.
+      if (!existing.pricingBasis && line.pricingBasis) {
+        existing.pricingBasis = line.pricingBasis;
+      }
+    }
+
+    for (const summary of shipmentSummaryMap.values()) {
+      ensureSpace(92);
+
+      const shipment = summary.shipment;
+
+      const trackingNumber =
+        shipment.trackingNumber ??
+        shipment.shipmentNumber;
+
+      drawText(
+        `Tracking: ${trackingNumber}`,
+        margin,
+        y,
+        {
+          size: 9,
+          bold: true,
+        }
+      );
+
+      y -= 15;
+
+      drawText(
+        `Description: ${shipment.description ?? "Not provided"
+        }`,
+        margin,
+        y,
+        {
+          size: 8.5,
+        }
+      );
+
+      y -= 15;
+
+      drawText(
+        `Shipping Mode: ${shipment.shippingMode}`,
+        margin,
+        y,
+        {
+          size: 8.5,
+        }
+      );
+
+      drawText(
+        `Goods Category: ${shipment.goodsCategory}`,
+        310,
+        y,
+        {
+          size: 8.5,
+        }
+      );
+
+      y -= 15;
+
+      drawText(
+        `Actual Weight: ${shipment.weightKg
+          ? `${shipment.weightKg.toString()} kg`
+          : "Not provided"
+        }`,
+        margin,
+        y,
+        {
+          size: 8.5,
+        }
+      );
+
+      drawText(
+        `Actual CBM: ${shipment.actualCbm?.toString() ??
+        "Not provided"
+        }`,
+        310,
+        y,
+        {
+          size: 8.5,
+        }
+      );
+
+      y -= 15;
+
+      drawText(
+        `Chargeable CBM: ${shipment.chargeableCbm?.toString() ??
+        "Not provided"
+        }`,
+        margin,
+        y,
+        {
+          size: 8.5,
+        }
+      );
+
+      drawText(
+        `Pricing Basis: ${summary.pricingBasis ?? "—"
+        }`,
+        310,
+        y,
+        {
+          size: 8.5,
+        }
+      );
+
+      y -= 20;
+    }
+
+    drawLine(y);
+    y -= 22;
+
+    // --------------------------------------------------
     // Line items
     // --------------------------------------------------
 
-    drawText("Invoice Lines", margin, y, {
+    drawText("Charges", margin, y, {
       size: 11,
       bold: true,
     });
@@ -399,14 +572,37 @@ export async function GET(
 
     const totalsX = margin;
 
+    drawText(
+      "Exchange Rate",
+      totalsX,
+      y,
+      {
+        size: 9,
+      }
+    );
+
+    drawRightText(
+      `1 USD = ${formatMoney(
+        invoice.exchangeRate.toString(),
+        4
+      )} GHS`,
+      y,
+      {
+        size: 9,
+        bold: true,
+      }
+    );
+
+    y -= 20;
+
     drawText("Subtotal USD", totalsX, y, {
       size: 10,
     });
 
     drawRightText(
-      `$${Number(
+      `$${formatMoney(
         invoice.subtotalUsd.toString()
-      ).toFixed(2)}`,
+      )}`,
       y,
       {
         size: 10,
@@ -416,21 +612,51 @@ export async function GET(
 
     y -= 24;
 
-    drawText("Total GHS", totalsX, y, {
-      size: 12,
-      bold: true,
+    y -= 18;
+
+    page.drawRectangle({
+      x: margin,
+      y: y - 12,
+      width: pageWidth - margin * 2,
+      height: 38,
+      color: rgb(0.96, 0.55, 0.12),
     });
 
-    drawRightText(
-      `GHS ${Number(
-        invoice.totalGhs.toString()
-      ).toFixed(2)}`,
+    drawText(
+      "GRAND TOTAL",
+      margin + 12,
       y,
       {
         size: 12,
         bold: true,
       }
     );
+
+    const grandTotal =
+      `GHS ${formatMoney(
+        invoice.totalGhs.toString()
+      )}`;
+
+    const grandTotalWidth =
+      boldFont.widthOfTextAtSize(
+        grandTotal,
+        14
+      );
+
+    drawText(
+      grandTotal,
+      pageWidth -
+      margin -
+      12 -
+      grandTotalWidth,
+      y - 1,
+      {
+        size: 14,
+        bold: true,
+      }
+    );
+
+    y -= 50;
 
     const pdfBytes = await pdf.save();
 
