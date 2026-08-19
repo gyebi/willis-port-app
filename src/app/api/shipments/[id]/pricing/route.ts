@@ -12,9 +12,7 @@ type RouteContext = {
 type PricingBody = {
   pricingBasis?: unknown;
   chargeableWeightKg?: unknown;
-  unitRateUsd?: unknown;
   manualChargeUsd?: unknown;
-  freightChargeUsd?: unknown;
   handlingChargeUsd?: unknown;
   documentationChargeUsd?: unknown;
   specialHandlingChargeUsd?: unknown;
@@ -46,9 +44,9 @@ export async function POST(
       );
     }
 
-    const pricingBasis = parsePricingBasis(body.pricingBasis);
+    const requestedPricingBasis = parsePricingBasis(body.pricingBasis);
 
-    if (!pricingBasis) {
+    if (!requestedPricingBasis) {
       return NextResponse.json(
         {
           ok: false,
@@ -84,38 +82,119 @@ export async function POST(
       );
     }
 
-    const freightChargeUsd =
-      parseOptionalDecimal(body.freightChargeUsd) ??
-      new Prisma.Decimal(0);
-    const handlingChargeUsd =
-      parseOptionalDecimal(body.handlingChargeUsd) ??
-      new Prisma.Decimal(0);
-    const documentationChargeUsd =
-      parseOptionalDecimal(body.documentationChargeUsd) ??
-      new Prisma.Decimal(0);
-    const specialHandlingChargeUsd =
-      parseOptionalDecimal(body.specialHandlingChargeUsd) ??
-      new Prisma.Decimal(0);
-    const deliveryChargeUsd =
-      parseOptionalDecimal(body.deliveryChargeUsd) ??
-      new Prisma.Decimal(0);
-    const otherChargeUsd =
-      parseOptionalDecimal(body.otherChargeUsd) ??
-      new Prisma.Decimal(0);
+
+ 
+
+    const handlingResult =
+  parseOptionalDecimal(body.handlingChargeUsd);
+
+if (!handlingResult.ok) {
+  return NextResponse.json(
+    {
+      ok: false,
+      message: "Invalid handling charge.",
+    },
+    { status: 400 }
+  );
+}
+
+const handlingChargeUsd = handlingResult.value;
+
+const documentationResult =
+  parseOptionalDecimal(body.documentationChargeUsd);
+
+if (!documentationResult.ok) {
+  return NextResponse.json(
+    {
+      ok: false,
+      message: "Invalid documentation charge.",
+    },
+    { status: 400 }
+  );
+}
+
+const documentationChargeUsd = documentationResult.value;
+
+const specialHandlingResult =
+  parseOptionalDecimal(body.specialHandlingChargeUsd);
+
+if (!specialHandlingResult.ok) {
+  return NextResponse.json(
+    {
+      ok: false,
+      message: "Invalid special handling charge.",
+    },
+    { status: 400 }
+  );
+}
+
+const specialHandlingChargeUsd = specialHandlingResult.value;
+
+const deliveryResult =
+  parseOptionalDecimal(body.deliveryChargeUsd);
+
+if (!deliveryResult.ok) {
+  return NextResponse.json(
+    {
+      ok: false,
+      message: "Invalid delivery charge.",
+    },
+    { status: 400 }
+  );
+}
+
+const deliveryChargeUsd = deliveryResult.value;
+
+const otherResult =
+  parseOptionalDecimal(body.otherChargeUsd);
+
+if (!otherResult.ok) {
+  return NextResponse.json(
+    {
+      ok: false,
+      message: "Invalid other charge.",
+    },
+    { status: 400 }
+  );
+}
+
+const otherChargeUsd = otherResult.value;
+
     const otherChargeDescription =
       typeof body.otherChargeDescription === "string"
         ? body.otherChargeDescription.trim() || null
         : null;
 
-    const shippingRate = await prisma.shippingRate.findFirst({
+    const shippingRate = await prisma.shippingRate.findUnique({
       where: {
-        shippingMode: shipment.shippingMode,
-        serviceType: shipment.serviceType,
-        goodsCategory: shipment.goodsCategory,
+        shippingMode_serviceType_goodsCategory: {
+          shippingMode: shipment.shippingMode,
+          serviceType: shipment.serviceType,
+          goodsCategory: shipment.goodsCategory,
+        },
       },
     });
 
-    if (!shippingRate && pricingBasis !== "MANUAL") {
+    let pricingBasis: "CBM" | "KG" | "MANUAL";
+
+    if (requestedPricingBasis === "MANUAL") {
+      pricingBasis = "MANUAL";
+    } else {
+      if (!shippingRate || !shippingRate.active) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message:
+              "No active shipping rate exists for this shipment.",
+          },
+          { status: 400 }
+        );
+      }
+
+      pricingBasis = shippingRate.pricingBasis;
+    }
+
+    if (!shippingRate && requestedPricingBasis !== "MANUAL") {
       return NextResponse.json(
         {
           ok: false,
@@ -178,7 +257,7 @@ export async function POST(
       baseChargeUsd = billableQuantity.mul(unitRate);
     } else if (pricingBasis === "KG") {
       chargeableWeight = parseRequiredDecimal(body.chargeableWeightKg, 3);
-      unitRate = parseRequiredDecimal(body.unitRateUsd, 2);
+      unitRate = shippingRate?.rateUsd ?? null;
 
       if (!chargeableWeight || !unitRate) {
         return NextResponse.json(
@@ -208,8 +287,7 @@ export async function POST(
       baseChargeUsd = manualCharge;
     }
 
-    const extraChargesUsd = freightChargeUsd
-      .add(handlingChargeUsd)
+    const extraChargesUsd = handlingChargeUsd
       .add(documentationChargeUsd)
       .add(specialHandlingChargeUsd)
       .add(deliveryChargeUsd)
@@ -240,13 +318,15 @@ export async function POST(
         billableQuantity,
         unitRateUsd: unitRate,
         manualChargeUsd: manualCharge,
-        freightChargeUsd,
+
+        freightChargeUsd: new Prisma.Decimal(0),
         handlingChargeUsd,
         documentationChargeUsd,
         specialHandlingChargeUsd,
         deliveryChargeUsd,
         otherChargeDescription,
         otherChargeUsd,
+
         exchangeRateToGhs: exchangeRate,
         customerChargeUsd,
         customerChargeGhs,
@@ -323,25 +403,49 @@ function parseOptionalText(value: unknown) {
 }
 
 function parseOptionalDecimal(
-  value: unknown
-): Prisma.Decimal | null {
-  if (value === undefined || value === null || value === "") {
-    return null;
+  value: unknown,
+  decimals = 2
+):
+  | { ok: true; value: Prisma.Decimal }
+  | { ok: false } {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
+    return {
+      ok: true,
+      value: new Prisma.Decimal(0),
+    };
   }
 
-  if (typeof value !== "string" && typeof value !== "number") {
-    return null;
+  if (
+    typeof value !== "string" &&
+    typeof value !== "number"
+  ) {
+    return { ok: false };
   }
 
-  try {
-    const amount = new Prisma.Decimal(value);
+  const text = String(value).trim();
+  const pattern = new RegExp(
+    `^\\d+(\\.\\d{1,${decimals}})?$`
+  );
 
-    if (amount.lessThan(0) || amount.greaterThan(1_000_000_000)) {
-      return null;
-    }
-
-    return amount;
-  } catch {
-    return null;
+  if (!pattern.test(text)) {
+    return { ok: false };
   }
+
+  const amount = new Prisma.Decimal(text);
+
+  if (
+    amount.lessThan(0) ||
+    amount.greaterThan(1_000_000_000)
+  ) {
+    return { ok: false };
+  }
+
+  return {
+    ok: true,
+    value: amount,
+  };
 }

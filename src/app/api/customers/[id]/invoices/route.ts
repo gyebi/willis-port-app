@@ -151,23 +151,6 @@ export async function POST(
               lineTotalGhs: baseChargeGhs,
             });
 
-            if (pricing.freightChargeUsd.gt(0)) {
-              lines.push({
-                lineType: "FREIGHT" as const,
-                shipmentId: pricing.shipmentId,
-                shipmentPricingId: pricing.id,
-                description: "Freight Charge",
-                pricingBasis: null,
-                billableQuantity: null,
-                unitRateUsd: null,
-                lineTotalUsd: pricing.freightChargeUsd,
-                lineTotalGhs:
-                  pricing.freightChargeUsd.mul(
-                    pricing.exchangeRateToGhs
-                  ),
-              });
-            }
-
             if (pricing.handlingChargeUsd.gt(0)) {
               lines.push({
                 lineType: "HANDLING" as const,

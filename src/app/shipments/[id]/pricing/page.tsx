@@ -106,8 +106,12 @@ export default async function PricingPage({
           </div>
         </section>
 
+
         <PricingForm
           shipmentId={shipment.id}
+          shippingMode={shipment.shippingMode}
+          serviceType={shipment.serviceType}
+          goodsCategory={shipment.goodsCategory}
           weightKg={shipment.weightKg?.toString() ?? ""}
           actualCbm={shipment.actualCbm?.toString() ?? ""}
           chargeableCbm={shipment.chargeableCbm?.toString() ?? ""}
@@ -128,8 +132,7 @@ export default async function PricingPage({
                 manualChargeUsd:
                   latestPricing.manualChargeUsd?.toString() ?? "",
 
-                freightChargeUsd:
-                  latestPricing.freightChargeUsd?.toString() ?? "",
+               
 
                 handlingChargeUsd:
                   latestPricing.handlingChargeUsd?.toString() ?? "",

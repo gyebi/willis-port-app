@@ -57,12 +57,12 @@ export async function GET(
       });
 
 
-    if (!rate) {
+    if (!rate || !rate.active) {
       return NextResponse.json(
         {
           ok: false,
           message:
-            "No shipping rate found.",
+            "No active shipping rate found.",
         },
         {
           status: 404,
