@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
 import { prisma } from "@/lib/prisma";
 
 import PricingForm from "./PricingForm";
@@ -38,6 +39,20 @@ export default async function PricingPage({
   }
 
   const latestPricing = shipment.pricings[0] ?? null;
+  const shippingRate = await prisma.shippingRate.findUnique({
+    where: {
+      shippingMode_serviceType_goodsCategory: {
+        shippingMode: shipment.shippingMode,
+        serviceType: shipment.serviceType,
+        goodsCategory: shipment.goodsCategory,
+      },
+    },
+  });
+
+  const activeShippingRate = shippingRate?.active ? shippingRate : null;
+  const rateError = activeShippingRate
+    ? null
+    : "No active shipping rate exists for this shipment. Structured pricing is unavailable until a rate is activated.";
 
   return (
     <main className={styles.page}>
@@ -57,7 +72,6 @@ export default async function PricingPage({
           <p>
             {shipment.customer.name} ·{" "}
             {shipment.trackingNumber ?? shipment.shipmentNumber}
-
           </p>
         </header>
 
@@ -78,10 +92,38 @@ export default async function PricingPage({
             </div>
 
             <div>
+              <span>Service Type</span>
+              <strong>{shipment.serviceType}</strong>
+            </div>
+
+            <div>
+              <span>Goods Category</span>
+              <strong>{shipment.goodsCategory}</strong>
+            </div>
+
+            <div>
               <span>Weight</span>
               <strong>
                 {shipment.weightKg
                   ? `${shipment.weightKg.toString()} kg`
+                  : "Not provided"}
+              </strong>
+            </div>
+
+            <div>
+              <span>Chargeable Weight</span>
+              <strong>
+                {shipment.chargeableWeightKg
+                  ? `${shipment.chargeableWeightKg.toString()} kg`
+                  : "Not provided"}
+              </strong>
+            </div>
+
+            <div>
+              <span>Declared CBM</span>
+              <strong>
+                {shipment.declaredCbm
+                  ? shipment.declaredCbm.toString()
                   : "Not provided"}
               </strong>
             </div>
@@ -106,6 +148,27 @@ export default async function PricingPage({
           </div>
         </section>
 
+        <section className={styles.section}>
+          <h2>Matched Shipping Rate</h2>
+
+          {activeShippingRate ? (
+            <div className={styles.grid}>
+              <div>
+                <span>Rate Basis</span>
+                <strong>{activeShippingRate.pricingBasis}</strong>
+              </div>
+
+              <div>
+                <span>Approved Rate</span>
+                <strong>
+                  {activeShippingRate.rateUsd.toString()} {activeShippingRate.unit}
+                </strong>
+              </div>
+            </div>
+          ) : (
+            <p className={styles.error}>{rateError}</p>
+          )}
+        </section>
 
         <PricingForm
           shipmentId={shipment.id}
@@ -118,48 +181,43 @@ export default async function PricingPage({
           }
           actualCbm={shipment.actualCbm?.toString() ?? ""}
           chargeableCbm={shipment.chargeableCbm?.toString() ?? ""}
-
+          shippingRate={
+            activeShippingRate
+              ? {
+                  pricingBasis: activeShippingRate.pricingBasis,
+                  rateUsd: activeShippingRate.rateUsd.toString(),
+                  unit: activeShippingRate.unit,
+                }
+              : null
+          }
+          rateError={rateError}
           latestPricing={
             latestPricing
               ? {
-                id: latestPricing.id,
-                status: latestPricing.status,
-                pricingBasis: latestPricing.pricingBasis,
-                chargeableWeightKg:
-                  latestPricing.chargeableWeightKg?.toString() ?? "",
-
-                unitRateUsd:
-                  latestPricing.unitRateUsd?.toString() ?? "",
-
-                manualChargeUsd:
-                  latestPricing.manualChargeUsd?.toString() ?? "",
-
-               
-
-                handlingChargeUsd:
-                  latestPricing.handlingChargeUsd?.toString() ?? "",
-
-                documentationChargeUsd:
-                  latestPricing.documentationChargeUsd?.toString() ?? "",
-
-                specialHandlingChargeUsd:
-                  latestPricing.specialHandlingChargeUsd?.toString() ?? "",
-
-                deliveryChargeUsd:
-                  latestPricing.deliveryChargeUsd?.toString() ?? "",
-
-                otherChargeDescription:
-                  latestPricing.otherChargeDescription ?? "",
-
-                otherChargeUsd:
-                  latestPricing.otherChargeUsd?.toString() ?? "",
-
-                exchangeRateToGhs:
-                  latestPricing.exchangeRateToGhs.toString(),
-
-                notes:
-                  latestPricing.notes ?? "",
-              }
+                  id: latestPricing.id,
+                  status: latestPricing.status,
+                  pricingBasis: latestPricing.pricingBasis,
+                  chargeableWeightKg:
+                    latestPricing.chargeableWeightKg?.toString() ?? "",
+                  unitRateUsd: latestPricing.unitRateUsd?.toString() ?? "",
+                  manualChargeUsd:
+                    latestPricing.manualChargeUsd?.toString() ?? "",
+                  handlingChargeUsd:
+                    latestPricing.handlingChargeUsd?.toString() ?? "",
+                  documentationChargeUsd:
+                    latestPricing.documentationChargeUsd?.toString() ?? "",
+                  specialHandlingChargeUsd:
+                    latestPricing.specialHandlingChargeUsd?.toString() ?? "",
+                  deliveryChargeUsd:
+                    latestPricing.deliveryChargeUsd?.toString() ?? "",
+                  otherChargeDescription:
+                    latestPricing.otherChargeDescription ?? "",
+                  otherChargeUsd:
+                    latestPricing.otherChargeUsd?.toString() ?? "",
+                  exchangeRateToGhs:
+                    latestPricing.exchangeRateToGhs.toString(),
+                  notes: latestPricing.notes ?? "",
+                }
               : null
           }
         />

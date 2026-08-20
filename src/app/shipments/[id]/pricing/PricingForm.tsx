@@ -1,15 +1,16 @@
 "use client";
 
-import {
-  FormEvent,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import styles from "./page.module.css";
 
 type PricingBasis = "CBM" | "KG" | "MANUAL";
+
+type ShippingRate = {
+  pricingBasis: PricingBasis;
+  rateUsd: string;
+  unit: string;
+};
 
 type PricingFormProps = {
   shipmentId: string;
@@ -20,28 +21,25 @@ type PricingFormProps = {
   chargeableWeightKg: string;
   actualCbm: string;
   chargeableCbm: string;
-
+  shippingRate: ShippingRate | null;
+  rateError: string | null;
   latestPricing: {
     id: string;
     status: "DRAFT" | "APPROVED" | "SUPERSEDED";
     pricingBasis: PricingBasis;
-
     chargeableWeightKg: string;
     unitRateUsd: string;
     manualChargeUsd: string;
-
     handlingChargeUsd: string;
     documentationChargeUsd: string;
     specialHandlingChargeUsd: string;
     deliveryChargeUsd: string;
-
     otherChargeDescription: string;
     otherChargeUsd: string;
-
     exchangeRateToGhs: string;
     notes: string;
   } | null;
-}
+};
 
 export default function PricingForm({
   shipmentId,
@@ -52,79 +50,44 @@ export default function PricingForm({
   chargeableWeightKg,
   actualCbm,
   chargeableCbm,
+  shippingRate,
+  rateError,
   latestPricing,
 }: PricingFormProps) {
-  const [pricingBasis, setPricingBasis] =
-    useState<PricingBasis | null>(
-      latestPricing?.pricingBasis ?? null
-    );
-
-  const [chargeableWeightKg, setChargeableWeightKg] =
-    useState(
-      latestPricing?.chargeableWeightKg || weightKg
-    );
-
-  
-
-  const [manualChargeUsd, setManualChargeUsd] =
-    useState(latestPricing?.manualChargeUsd ?? "");
-
-  const [exchangeRateToGhs, setExchangeRateToGhs] =
-    useState(
-      latestPricing?.exchangeRateToGhs ?? "1"
-    );
-
-  const [notes, setNotes] =
-    useState(latestPricing?.notes ?? "");
-
-  const [pricingId, setPricingId] = useState<
-    string | null
-  >(latestPricing?.id ?? null);
-
-  const [approvedRateUsd, setApprovedRateUsd] =
-    useState(latestPricing?.unitRateUsd ?? "");
-
-  const [approvedRateUnit, setApprovedRateUnit] =
-    useState("");
-
-  const [rateError, setRateError] =
-    useState("");
-
+  const [pricingBasis, setPricingBasis] = useState<PricingBasis>(
+    latestPricing?.pricingBasis ?? shippingRate?.pricingBasis ?? "MANUAL"
+  );
+  const [manualChargeUsd, setManualChargeUsd] = useState(
+    latestPricing?.manualChargeUsd ?? ""
+  );
+  const [exchangeRateToGhs, setExchangeRateToGhs] = useState(
+    latestPricing?.exchangeRateToGhs ?? "1"
+  );
+  const [notes, setNotes] = useState(latestPricing?.notes ?? "");
+  const [pricingId, setPricingId] = useState<string | null>(
+    latestPricing?.id ?? null
+  );
   const [pricingStatus, setPricingStatus] = useState<
     "DRAFT" | "APPROVED" | "SUPERSEDED" | null
   >(latestPricing?.status ?? null);
-
-
-
-  const [handlingChargeUsd, setHandlingChargeUsd] =
-    useState(
-      latestPricing?.handlingChargeUsd ?? ""
-    );
-
-  const [documentationChargeUsd, setDocumentationChargeUsd] =
-    useState(
-      latestPricing?.documentationChargeUsd ?? ""
-    );
-
-  const [specialHandlingChargeUsd, setSpecialHandlingChargeUsd] =
-    useState(
-      latestPricing?.specialHandlingChargeUsd ?? ""
-    );
-
-  const [deliveryChargeUsd, setDeliveryChargeUsd] =
-    useState(
-      latestPricing?.deliveryChargeUsd ?? ""
-    );
-
-  const [otherChargeDescription, setOtherChargeDescription] =
-    useState(
-      latestPricing?.otherChargeDescription ?? ""
-    );
-
-  const [otherChargeUsd, setOtherChargeUsd] =
-    useState(
-      latestPricing?.otherChargeUsd ?? ""
-    );
+  const [handlingChargeUsd, setHandlingChargeUsd] = useState(
+    latestPricing?.handlingChargeUsd ?? ""
+  );
+  const [documentationChargeUsd, setDocumentationChargeUsd] = useState(
+    latestPricing?.documentationChargeUsd ?? ""
+  );
+  const [specialHandlingChargeUsd, setSpecialHandlingChargeUsd] = useState(
+    latestPricing?.specialHandlingChargeUsd ?? ""
+  );
+  const [deliveryChargeUsd, setDeliveryChargeUsd] = useState(
+    latestPricing?.deliveryChargeUsd ?? ""
+  );
+  const [otherChargeDescription, setOtherChargeDescription] = useState(
+    latestPricing?.otherChargeDescription ?? ""
+  );
+  const [otherChargeUsd, setOtherChargeUsd] = useState(
+    latestPricing?.otherChargeUsd ?? ""
+  );
 
   const [isSaving, setIsSaving] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -132,144 +95,88 @@ export default function PricingForm({
   const [error, setError] = useState("");
 
   const isApproved = pricingStatus === "APPROVED";
-
-  const hasRequiredPricingInput =
-    pricingBasis === "CBM"
-      ? Number(chargeableCbm || 0) > 0
-      : pricingBasis === "KG"
-        ? Number(chargeableWeightKg || 0) > 0
-        : Number(manualChargeUsd || 0) > 0;
-
-  const hasValidExchangeRate =
-    Number(exchangeRateToGhs) > 0;
+  const activeShippingRate = shippingRate;
+  const structuredPricingAvailable = Boolean(activeShippingRate);
+  const structuredPricingBasis = activeShippingRate?.pricingBasis ?? null;
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadShippingRate() {
-      setRateError("");
-
-      try {
-        const params = new URLSearchParams({
-          shippingMode,
-          serviceType,
-          goodsCategory,
-        });
-
-        const response = await fetch(
-          `/api/shipping-rates?${params.toString()}`
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          if (!cancelled) {
-            setRateError(
-              result.message ??
-              "Unable to load shipping rate."
-            );
-          }
-          return;
-        }
-
-        if (!cancelled) {
-          setApprovedRateUsd(result.rateUsd);
-          setApprovedRateUnit(result.unit);
-
-          if (!latestPricing) {
-            setPricingBasis(result.pricingBasis);
-          }
-        }
-      } catch (error) {
-        console.error(error);
-
-        if (!cancelled) {
-          setRateError(
-            "Unable to load shipping rate."
-          );
-        }
-      }
+    if (isApproved || !structuredPricingAvailable) {
+      return;
     }
 
+    if (!structuredPricingBasis) {
+      return;
+    }
 
-      loadShippingRate();
-
-      return () => {
-        cancelled = true;
-      };
-    }, [
-      shippingMode,
-      serviceType,
-      goodsCategory,
-      latestPricing,
-    ]);
+    if (
+      pricingBasis !== "MANUAL" &&
+      pricingBasis !== structuredPricingBasis
+    ) {
+      setPricingBasis(structuredPricingBasis);
+    }
+  }, [
+    isApproved,
+    pricingBasis,
+    structuredPricingAvailable,
+    structuredPricingBasis,
+  ]);
 
   const preview = useMemo(() => {
     const exchangeRate = Number(exchangeRateToGhs || 0);
-
     const extraChargesUsd =
-
       Number(handlingChargeUsd || 0) +
       Number(documentationChargeUsd || 0) +
       Number(specialHandlingChargeUsd || 0) +
       Number(deliveryChargeUsd || 0) +
       Number(otherChargeUsd || 0);
 
-    if (pricingBasis === "CBM") {
-      const quantity = Number(chargeableCbm || 0);
-      const rate = Number(approvedRateUsd || 0);
+    if (pricingBasis === "MANUAL") {
+      const baseUsd = Number(manualChargeUsd || 0);
 
-      if (quantity <= 0 || rate <= 0) {
+      if (baseUsd <= 0) {
         return null;
       }
 
-      const baseUsd = quantity * rate;
       const totalUsd = baseUsd + extraChargesUsd;
 
       return {
-        quantity,
+        quantity: 1,
         usd: totalUsd,
         ghs: totalUsd * exchangeRate,
       };
     }
 
-    if (pricingBasis === "KG") {
-      const quantity = Number(chargeableWeightKg || 0);
-      const rate = Number(approvedRateUsd || 0);
-
-
-      if (quantity <= 0 || rate <= 0) {
-        return null;
-      }
-
-      const baseUsd = quantity * rate;
-      const totalUsd = baseUsd + extraChargesUsd;
-
-      return {
-        quantity,
-        usd: totalUsd,
-        ghs: totalUsd * exchangeRate,
-      };
-    }
-
-    const baseUsd = Number(manualChargeUsd || 0);
-
-    if (baseUsd <= 0) {
+    if (!activeShippingRate) {
       return null;
     }
 
+    if (pricingBasis !== activeShippingRate.pricingBasis) {
+      return null;
+    }
+
+    const quantity =
+      pricingBasis === "KG"
+        ? Number(chargeableWeightKg || 0)
+        : Number(chargeableCbm || 0);
+    const rate = Number(activeShippingRate.rateUsd || 0);
+
+    if (quantity <= 0 || rate <= 0) {
+      return null;
+    }
+
+    const baseUsd = quantity * rate;
     const totalUsd = baseUsd + extraChargesUsd;
 
     return {
-      quantity: 1,
+      quantity,
       usd: totalUsd,
       ghs: totalUsd * exchangeRate,
     };
   }, [
-    pricingBasis,
+    activeShippingRate,
     chargeableCbm,
     chargeableWeightKg,
-    approvedRateUsd,
+    pricingBasis,
     manualChargeUsd,
     exchangeRateToGhs,
     handlingChargeUsd,
@@ -279,9 +186,18 @@ export default function PricingForm({
     otherChargeUsd,
   ]);
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  const hasRequiredPricingInput =
+    pricingBasis === "MANUAL"
+      ? Number(manualChargeUsd || 0) > 0
+      : Boolean(activeShippingRate) &&
+        pricingBasis === activeShippingRate?.pricingBasis &&
+        (pricingBasis === "KG"
+          ? Number(chargeableWeightKg || 0) > 0
+          : Number(chargeableCbm || 0) > 0);
+
+  const hasValidExchangeRate = Number(exchangeRateToGhs) > 0;
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (isApproved) {
@@ -302,7 +218,6 @@ export default function PricingForm({
           },
           body: JSON.stringify({
             pricingBasis,
-            chargeableWeightKg,
             manualChargeUsd,
             handlingChargeUsd,
             documentationChargeUsd,
@@ -319,21 +234,17 @@ export default function PricingForm({
       const result = await response.json();
 
       if (!response.ok) {
-        setError(
-          result.message ?? "Unable to save pricing."
-        );
+        setError(result.message ?? "Unable to save pricing.");
         return;
       }
 
       setPricingId(result.pricing.id);
       setPricingStatus("DRAFT");
       setMessage("Shipment pricing saved.");
-    } catch (err) {
-      console.error(err);
+    } catch (submissionError) {
+      console.error(submissionError);
 
-      setError(
-        "Unable to save shipment pricing."
-      );
+      setError("Unable to save shipment pricing.");
     } finally {
       setIsSaving(false);
     }
@@ -360,92 +271,127 @@ export default function PricingForm({
       const result = await response.json();
 
       if (!response.ok) {
-        setError(
-          result.message ?? "Unable to approve pricing."
-        );
+        setError(result.message ?? "Unable to approve pricing.");
         return;
       }
 
       setPricingStatus("APPROVED");
       setMessage("Shipment pricing approved.");
-    } catch (error) {
-      console.error(
-        "Failed to approve shipment pricing:",
-        error
-      );
+    } catch (approvalError) {
+      console.error("Failed to approve shipment pricing:", approvalError);
 
-      setError(
-        "Unable to approve shipment pricing."
-      );
+      setError("Unable to approve shipment pricing.");
     } finally {
       setIsApproving(false);
     }
   }
 
   return (
-    <form
-      className={styles.section}
-      onSubmit={handleSubmit}
-    >
+    <form className={styles.section} onSubmit={handleSubmit}>
       <div className={styles.summaryBox}>
         <h3>Shipment Pricing Summary</h3>
 
         <p>
-          Actual Weight:
+          Shipping Mode:
+          <strong>{shippingMode}</strong>
+        </p>
+
+        <p>
+          Service Type:
+          <strong>{serviceType}</strong>
+        </p>
+
+        <p>
+          Goods Category:
+          <strong>{goodsCategory}</strong>
+        </p>
+
+        <p>
+          Active Rate:
           <strong>
-            {weightKg || "0"} kg
+            {activeShippingRate
+              ? `${activeShippingRate.pricingBasis} ${activeShippingRate.rateUsd} ${activeShippingRate.unit}`
+              : "No active rate"}
           </strong>
+        </p>
+
+        <p>
+          Weight:
+          <strong>{weightKg || "0"} kg</strong>
+        </p>
+
+        <p>
+          Chargeable Weight:
+          <strong>{chargeableWeightKg || "0"} kg</strong>
         </p>
 
         <p>
           Actual CBM:
-          <strong>
-            {actualCbm || "0"}
-          </strong>
+          <strong>{actualCbm || "0"}</strong>
         </p>
 
         <p>
           Chargeable CBM:
-          <strong>
-            {chargeableCbm || "0"}
-          </strong>
+          <strong>{chargeableCbm || "0"}</strong>
         </p>
       </div>
+
       <h2>Financial Calculation</h2>
 
       <div className={styles.grid}>
         <div>
-          <label htmlFor="pricingBasis">
-            Pricing Basis
-          </label>
+          <label htmlFor="pricingBasis">Pricing Basis</label>
 
           <select
             id="pricingBasis"
-            value={pricingBasis ?? ""} disabled={isApproved}
+            value={pricingBasis}
+            disabled={isApproved}
             onChange={(event) =>
-              setPricingBasis(
-                event.target.value as PricingBasis
-              )
+              setPricingBasis(event.target.value as PricingBasis)
             }
           >
-
-            <option value="" disabled>
-              Loading pricing basis...
-            </option>
-
-
-            <option value="CBM">CBM</option>
-            <option value="KG">KG</option>
-            <option value="MANUAL">
-              Manual / Special
-            </option>
-
+            {structuredPricingAvailable ? (
+              <>
+                <option value={activeShippingRate!.pricingBasis}>
+                  Matched rate ({activeShippingRate!.pricingBasis})
+                </option>
+                <option
+                  value={
+                    activeShippingRate!.pricingBasis === "KG"
+                      ? "CBM"
+                      : "KG"
+                  }
+                  disabled
+                >
+                  {activeShippingRate!.pricingBasis === "KG"
+                    ? "CBM not available for this shipment"
+                    : "KG not available for this shipment"}
+                </option>
+                <option value="MANUAL">Manual / Special</option>
+              </>
+            ) : (
+              <>
+                <option value="MANUAL">Manual / Special</option>
+                <option value="KG" disabled>
+                  KG unavailable until an active rate exists
+                </option>
+                <option value="CBM" disabled>
+                  CBM unavailable until an active rate exists
+                </option>
+              </>
+            )}
           </select>
         </div>
 
         <div>
-          <span>Actual CBM</span>
-          <strong>{actualCbm || "Not provided"}</strong>
+          <span>Matched Rate</span>
+          <strong>
+            {activeShippingRate
+              ? `${activeShippingRate.rateUsd} ${activeShippingRate.unit}`
+              : rateError
+                ? "Rate unavailable"
+                : "No active rate"}
+          </strong>
         </div>
       </div>
 
@@ -453,24 +399,7 @@ export default function PricingForm({
         <div className={styles.grid}>
           <div>
             <span>Chargeable CBM</span>
-            <strong>
-              {chargeableCbm || "Not provided"}
-            </strong>
-          </div>
-
-          <div>
-            <label htmlFor="unitRateUsd">
-              Rate per CBM (USD)
-            </label>
-
-            <div>
-              <span>Approved Rate</span>
-              <strong>
-                {approvedRateUsd
-                  ? `$${approvedRateUsd} ${approvedRateUnit}`
-                  : "Loading rate..."}
-              </strong>
-            </div>
+            <strong>{chargeableCbm || "Not provided"}</strong>
           </div>
         </div>
       )}
@@ -478,52 +407,15 @@ export default function PricingForm({
       {pricingBasis === "KG" && (
         <div className={styles.grid}>
           <div>
-            <span>Actual Weight</span>
-            <strong>
-              {weightKg
-                ? `${weightKg} kg`
-                : "Not provided"}
-            </strong>
-          </div>
-
-          <div>
-            <label htmlFor="chargeableWeightKg">
-              Chargeable Weight (kg)
-            </label>
-
-            <input
-              id="chargeableWeightKg"
-              type="number"
-              min="0"
-              step="0.001"
-              value={chargeableWeightKg}
-              disabled={isApproved}
-              onChange={(event) =>
-                setChargeableWeightKg(
-                  event.target.value
-                )
-              }
-            />
-          </div>
-
-          <div>
-            <span>Approved Rate</span>
-            <strong>
-              {approvedRateUsd
-                ? `$${approvedRateUsd} ${approvedRateUnit}`
-                : rateError
-                  ? "Rate unavailable"
-                  : "Loading rate..."}
-            </strong>
+            <span>Chargeable Weight</span>
+            <strong>{chargeableWeightKg || "Not provided"}</strong>
           </div>
         </div>
       )}
 
       {pricingBasis === "MANUAL" && (
         <div>
-          <label htmlFor="manualChargeUsd">
-            Manual Charge (USD)
-          </label>
+          <label htmlFor="manualChargeUsd">Manual Charge (USD)</label>
 
           <input
             id="manualChargeUsd"
@@ -532,22 +424,16 @@ export default function PricingForm({
             step="0.01"
             value={manualChargeUsd}
             disabled={isApproved}
-            onChange={(event) =>
-              setManualChargeUsd(event.target.value)
-            }
+            onChange={(event) => setManualChargeUsd(event.target.value)}
           />
         </div>
       )}
 
       <div className={styles.grid}>
-        <div>
-
-        </div>
+        <div />
 
         <div>
-          <label htmlFor="handlingChargeUsd">
-            Handling Charge (USD)
-          </label>
+          <label htmlFor="handlingChargeUsd">Handling Charge (USD)</label>
           <input
             id="handlingChargeUsd"
             type="number"
@@ -555,9 +441,7 @@ export default function PricingForm({
             step="0.01"
             value={handlingChargeUsd}
             disabled={isApproved}
-            onChange={(e) =>
-              setHandlingChargeUsd(e.target.value)
-            }
+            onChange={(event) => setHandlingChargeUsd(event.target.value)}
           />
         </div>
 
@@ -572,10 +456,8 @@ export default function PricingForm({
             step="0.01"
             value={documentationChargeUsd}
             disabled={isApproved}
-            onChange={(e) =>
-              setDocumentationChargeUsd(
-                e.target.value
-              )
+            onChange={(event) =>
+              setDocumentationChargeUsd(event.target.value)
             }
           />
         </div>
@@ -591,18 +473,14 @@ export default function PricingForm({
             step="0.01"
             value={specialHandlingChargeUsd}
             disabled={isApproved}
-            onChange={(e) =>
-              setSpecialHandlingChargeUsd(
-                e.target.value
-              )
+            onChange={(event) =>
+              setSpecialHandlingChargeUsd(event.target.value)
             }
           />
         </div>
 
         <div>
-          <label htmlFor="deliveryChargeUsd">
-            Delivery Charge (USD)
-          </label>
+          <label htmlFor="deliveryChargeUsd">Delivery Charge (USD)</label>
           <input
             id="deliveryChargeUsd"
             type="number"
@@ -610,9 +488,7 @@ export default function PricingForm({
             step="0.01"
             value={deliveryChargeUsd}
             disabled={isApproved}
-            onChange={(e) =>
-              setDeliveryChargeUsd(e.target.value)
-            }
+            onChange={(event) => setDeliveryChargeUsd(event.target.value)}
           />
         </div>
 
@@ -625,18 +501,14 @@ export default function PricingForm({
             type="text"
             value={otherChargeDescription}
             disabled={isApproved}
-            onChange={(e) =>
-              setOtherChargeDescription(
-                e.target.value
-              )
+            onChange={(event) =>
+              setOtherChargeDescription(event.target.value)
             }
           />
         </div>
 
         <div>
-          <label htmlFor="otherChargeUsd">
-            Other Charge (USD)
-          </label>
+          <label htmlFor="otherChargeUsd">Other Charge (USD)</label>
           <input
             id="otherChargeUsd"
             type="number"
@@ -644,18 +516,14 @@ export default function PricingForm({
             step="0.01"
             value={otherChargeUsd}
             disabled={isApproved}
-            onChange={(e) =>
-              setOtherChargeUsd(e.target.value)
-            }
+            onChange={(event) => setOtherChargeUsd(event.target.value)}
           />
         </div>
       </div>
 
       <div className={styles.grid}>
         <div>
-          <label htmlFor="exchangeRate">
-            USD → GHS Exchange Rate
-          </label>
+          <label htmlFor="exchangeRate">USD → GHS Exchange Rate</label>
 
           <input
             id="exchangeRate"
@@ -665,26 +533,20 @@ export default function PricingForm({
             value={exchangeRateToGhs}
             disabled={isApproved}
             onChange={(event) =>
-              setExchangeRateToGhs(
-                event.target.value
-              )
+              setExchangeRateToGhs(event.target.value)
             }
           />
         </div>
 
         <div>
-          <label htmlFor="notes">
-            Pricing Notes
-          </label>
+          <label htmlFor="notes">Pricing Notes</label>
 
           <input
             id="notes"
             type="text"
             value={notes}
             disabled={isApproved}
-            onChange={(event) =>
-              setNotes(event.target.value)
-            }
+            onChange={(event) => setNotes(event.target.value)}
           />
         </div>
       </div>
@@ -694,27 +556,24 @@ export default function PricingForm({
 
         {preview ? (
           <>
-            <strong>
-              ${preview.usd.toFixed(2)} USD
-            </strong>
+            <strong>${preview.usd.toFixed(2)} USD</strong>
 
-            <small>
-              GHS {preview.ghs.toFixed(2)}
-            </small>
+            <small>GHS {preview.ghs.toFixed(2)}</small>
           </>
         ) : (
           <small>
-            Enter the required pricing quantity and rate to calculate the customer charge.
+            Enter the required pricing quantity and rate to calculate the
+            customer charge.
           </small>
         )}
       </div>
 
-      {message && (
-        <p className={styles.success}>{message}</p>
-      )}
+      {message && <p className={styles.success}>{message}</p>}
 
-      {error && (
-        <p className={styles.error}>{error}</p>
+      {error && <p className={styles.error}>{error}</p>}
+
+      {rateError && (
+        <p className={styles.error}>{rateError}</p>
       )}
 
       <div className={styles.actions}>
@@ -729,9 +588,7 @@ export default function PricingForm({
               !preview
             }
           >
-            {isSaving
-              ? "Saving..."
-              : "Save Draft Pricing"}
+            {isSaving ? "Saving..." : "Save Draft Pricing"}
           </button>
         )}
 
@@ -742,24 +599,12 @@ export default function PricingForm({
             disabled={isSaving || isApproving}
             className={styles.approveButton}
           >
-            {isApproving
-              ? "Approving..."
-              : "Approve Pricing"}
+            {isApproving ? "Approving..." : "Approve Pricing"}
           </button>
         )}
 
-        {isApproved && (
-          <div className={styles.approvedBadge}>
-            Approved
-          </div>
-        )}
+        {isApproved && <div className={styles.approvedBadge}>Approved</div>}
       </div>
-
-      {rateError && (
-        <p className={styles.error}>
-          {rateError}
-        </p>
-      )}
     </form>
   );
 }

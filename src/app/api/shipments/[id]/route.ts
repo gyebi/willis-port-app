@@ -12,6 +12,8 @@ type UpdateShipmentBody = {
   trackingNumber?: unknown;
   description?: unknown;
   shippingMode?: unknown;
+  serviceType?: unknown;
+  goodsCategory?: unknown;
   goodsType?: unknown;
   weightKg?: unknown;
   chargeableWeightKg?: unknown;
@@ -50,6 +52,32 @@ export async function PATCH(
         {
           ok: false,
           message: "Invalid shipping mode.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const serviceType =
+      parseServiceType(body.serviceType);
+
+    if (!serviceType) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid service type.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const goodsCategory =
+      parseGoodsCategory(body.goodsCategory);
+
+    if (!goodsCategory) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid goods category.",
         },
         { status: 400 }
       );
@@ -129,6 +157,8 @@ export async function PATCH(
             parseOptionalText(body.goodsType),
 
           shippingMode,
+          serviceType,
+          goodsCategory,
 
           weightKg,
           chargeableWeightKg,
@@ -192,6 +222,26 @@ function parseShippingMode(
     value === "AIR" ||
     value === "UNKNOWN"
   ) {
+    return value;
+  }
+
+  return null;
+}
+
+function parseServiceType(
+  value: unknown
+): "STANDARD" | "EXPRESS" | null {
+  if (value === "STANDARD" || value === "EXPRESS") {
+    return value;
+  }
+
+  return null;
+}
+
+function parseGoodsCategory(
+  value: unknown
+): "NORMAL" | "SPECIAL" | null {
+  if (value === "NORMAL" || value === "SPECIAL") {
     return value;
   }
 

@@ -12,6 +12,8 @@ type EditShipmentFormProps = {
     id: string;
     trackingNumber: string;
     shippingMode: "SEA" | "AIR" | "UNKNOWN";
+    serviceType: "STANDARD" | "EXPRESS";
+    goodsCategory: "NORMAL" | "SPECIAL";
     goodsType: string;
     dateReceived: string;
     weightKg: string;
@@ -55,6 +57,8 @@ export default function EditShipmentForm({
             trackingNumber: form.get("trackingNumber"),
             description: form.get("description"),
             shippingMode: form.get("shippingMode"),
+            serviceType: form.get("serviceType"),
+            goodsCategory: form.get("goodsCategory"),
             goodsType: form.get("goodsType"),
             weightKg: form.get("weightKg"),
             chargeableWeightKg: form.get("chargeableWeightKg"),
@@ -95,9 +99,11 @@ export default function EditShipmentForm({
       <ShipmentFields
         gridClassName={styles.grid}
         includeMeasurements={true}
-        defaults={{
+          defaults={{
           trackingNumber: shipment.trackingNumber,
           shippingMode: shipment.shippingMode,
+          serviceType: shipment.serviceType,
+          goodsCategory: shipment.goodsCategory,
           goodsType: shipment.goodsType,
           dateReceived: shipment.dateReceived,
           weightKg: shipment.weightKg,

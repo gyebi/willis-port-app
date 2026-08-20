@@ -71,6 +71,8 @@ export default async function ShipmentPage({
                 shipment.trackingNumber ?? "",
               shippingMode:
                 shipment.shippingMode,
+              serviceType: shipment.serviceType,
+              goodsCategory: shipment.goodsCategory,
               goodsType:
                 shipment.goodsType ?? "",
               dateReceived:

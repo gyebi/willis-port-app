@@ -4,6 +4,8 @@ type ShipmentFieldsProps = {
   defaults?: {
     trackingNumber?: string;
     shippingMode?: "SEA" | "AIR" | "UNKNOWN";
+    serviceType?: "STANDARD" | "EXPRESS";
+    goodsCategory?: "NORMAL" | "SPECIAL";
     goodsType?: string;
     dateReceived?: string;
     weightKg?: string;
@@ -12,7 +14,6 @@ type ShipmentFieldsProps = {
     actualCbm?: string;
     chargeableCbm?: string;
     description?: string;
-    
   };
   includeMeasurements?: boolean;
 };
@@ -20,7 +21,7 @@ type ShipmentFieldsProps = {
 export default function ShipmentFields({
   gridClassName,
   defaults,
-  includeMeasurements = false,
+  includeMeasurements = true,
 }: ShipmentFieldsProps) {
   return (
     <>
@@ -48,12 +49,49 @@ export default function ShipmentFields({
             name="shippingMode"
             defaultValue={defaults?.shippingMode ?? "UNKNOWN"}
           >
+            <option value="AIR">Air</option>
+            <option value="SEA">Sea</option>
             <option value="UNKNOWN">
               Not yet known
             </option>
+          </select>
+        </div>
 
-            <option value="SEA">Sea</option>
-            <option value="AIR">Air</option>
+        <div>
+          <label htmlFor="serviceType">
+            Service Type
+          </label>
+
+          <select
+            id="serviceType"
+            name="serviceType"
+            required={!defaults?.serviceType}
+            defaultValue={defaults?.serviceType ?? ""}
+          >
+            <option value="" disabled>
+              Select service type
+            </option>
+            <option value="STANDARD">Standard</option>
+            <option value="EXPRESS">Express</option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="goodsCategory">
+            Goods Category
+          </label>
+
+          <select
+            id="goodsCategory"
+            name="goodsCategory"
+            required={!defaults?.goodsCategory}
+            defaultValue={defaults?.goodsCategory ?? ""}
+          >
+            <option value="" disabled>
+              Select goods category
+            </option>
+            <option value="NORMAL">Normal</option>
+            <option value="SPECIAL">Special</option>
           </select>
         </div>
 

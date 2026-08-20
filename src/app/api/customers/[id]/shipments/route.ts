@@ -12,9 +12,14 @@ type ShipmentBody = {
   trackingNumber?: unknown;
   description?: unknown;
   shippingMode?: unknown;
+  serviceType?: unknown;
+  goodsCategory?: unknown;
   goodsType?: unknown;
   weightKg?: unknown;
+  chargeableWeightKg?: unknown;
   declaredCbm?: unknown;
+  actualCbm?: unknown;
+  chargeableCbm?: unknown;
   dateReceived?: unknown;
 };
 
@@ -79,15 +84,59 @@ export async function POST(
       );
     }
 
+    const serviceType =
+      parseServiceType(body.serviceType);
+
+    if (!serviceType) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid service type.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    const goodsCategory =
+      parseGoodsCategory(body.goodsCategory);
+
+    if (!goodsCategory) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid goods category.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
     const weightKg =
       parsePositiveDecimal(body.weightKg);
+
+    const chargeableWeightKg =
+      parsePositiveDecimal(
+        body.chargeableWeightKg
+      );
 
     const declaredCbm =
       parsePositiveDecimal(body.declaredCbm);
 
+    const actualCbm =
+      parsePositiveDecimal(body.actualCbm);
+
+    const chargeableCbm =
+      parsePositiveDecimal(body.chargeableCbm);
+
     if (
       weightKg === undefined ||
-      declaredCbm === undefined
+      chargeableWeightKg === undefined ||
+      declaredCbm === undefined ||
+      actualCbm === undefined ||
+      chargeableCbm === undefined
     ) {
       return NextResponse.json(
         {
@@ -141,9 +190,14 @@ export async function POST(
             ),
 
           shippingMode,
+          serviceType,
+          goodsCategory,
 
           weightKg,
+          chargeableWeightKg,
           declaredCbm,
+          actualCbm,
+          chargeableCbm,
 
           dateReceived,
 
@@ -191,6 +245,26 @@ function parseShippingMode(
     value === "AIR" ||
     value === "UNKNOWN"
   ) {
+    return value;
+  }
+
+  return null;
+}
+
+function parseServiceType(
+  value: unknown
+): "STANDARD" | "EXPRESS" | null {
+  if (value === "STANDARD" || value === "EXPRESS") {
+    return value;
+  }
+
+  return null;
+}
+
+function parseGoodsCategory(
+  value: unknown
+): "NORMAL" | "SPECIAL" | null {
+  if (value === "NORMAL" || value === "SPECIAL") {
     return value;
   }
 
