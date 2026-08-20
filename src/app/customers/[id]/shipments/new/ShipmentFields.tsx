@@ -7,6 +7,7 @@ type ShipmentFieldsProps = {
     goodsType?: string;
     dateReceived?: string;
     weightKg?: string;
+    chargeableWeightKg?: string;
     declaredCbm?: string;
     actualCbm?: string;
     chargeableCbm?: string;
@@ -97,6 +98,23 @@ export default function ShipmentFields({
             defaultValue={defaults?.weightKg ?? ""}
           />
         </div>
+
+        {includeMeasurements && (
+          <div>
+            <label htmlFor="chargeableWeightKg">
+              Chargeable Weight (kg)
+            </label>
+
+            <input
+              id="chargeableWeightKg"
+              name="chargeableWeightKg"
+              type="number"
+              min="0"
+              step="0.001"
+              defaultValue={defaults?.chargeableWeightKg ?? ""}
+            />
+          </div>
+        )}
 
         <div>
           <label htmlFor="declaredCbm">

@@ -81,6 +81,8 @@ export default async function ShipmentPage({
                   : "",
               weightKg:
                 shipment.weightKg?.toString() ?? "",
+              chargeableWeightKg:
+                shipment.chargeableWeightKg?.toString() ?? "",
               declaredCbm:
                 shipment.declaredCbm?.toString() ?? "",
               actualCbm:

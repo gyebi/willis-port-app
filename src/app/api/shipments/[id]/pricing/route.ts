@@ -83,82 +83,80 @@ export async function POST(
     }
 
 
- 
-
     const handlingResult =
-  parseOptionalDecimal(body.handlingChargeUsd);
+      parseOptionalDecimal(body.handlingChargeUsd);
 
-if (!handlingResult.ok) {
-  return NextResponse.json(
-    {
-      ok: false,
-      message: "Invalid handling charge.",
-    },
-    { status: 400 }
-  );
-}
+    if (!handlingResult.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid handling charge.",
+        },
+        { status: 400 }
+      );
+    }
 
-const handlingChargeUsd = handlingResult.value;
+    const handlingChargeUsd = handlingResult.value;
 
-const documentationResult =
-  parseOptionalDecimal(body.documentationChargeUsd);
+    const documentationResult =
+      parseOptionalDecimal(body.documentationChargeUsd);
 
-if (!documentationResult.ok) {
-  return NextResponse.json(
-    {
-      ok: false,
-      message: "Invalid documentation charge.",
-    },
-    { status: 400 }
-  );
-}
+    if (!documentationResult.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid documentation charge.",
+        },
+        { status: 400 }
+      );
+    }
 
-const documentationChargeUsd = documentationResult.value;
+    const documentationChargeUsd = documentationResult.value;
 
-const specialHandlingResult =
-  parseOptionalDecimal(body.specialHandlingChargeUsd);
+    const specialHandlingResult =
+      parseOptionalDecimal(body.specialHandlingChargeUsd);
 
-if (!specialHandlingResult.ok) {
-  return NextResponse.json(
-    {
-      ok: false,
-      message: "Invalid special handling charge.",
-    },
-    { status: 400 }
-  );
-}
+    if (!specialHandlingResult.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid special handling charge.",
+        },
+        { status: 400 }
+      );
+    }
 
-const specialHandlingChargeUsd = specialHandlingResult.value;
+    const specialHandlingChargeUsd = specialHandlingResult.value;
 
-const deliveryResult =
-  parseOptionalDecimal(body.deliveryChargeUsd);
+    const deliveryResult =
+      parseOptionalDecimal(body.deliveryChargeUsd);
 
-if (!deliveryResult.ok) {
-  return NextResponse.json(
-    {
-      ok: false,
-      message: "Invalid delivery charge.",
-    },
-    { status: 400 }
-  );
-}
+    if (!deliveryResult.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid delivery charge.",
+        },
+        { status: 400 }
+      );
+    }
 
-const deliveryChargeUsd = deliveryResult.value;
+    const deliveryChargeUsd = deliveryResult.value;
 
-const otherResult =
-  parseOptionalDecimal(body.otherChargeUsd);
+    const otherResult =
+      parseOptionalDecimal(body.otherChargeUsd);
 
-if (!otherResult.ok) {
-  return NextResponse.json(
-    {
-      ok: false,
-      message: "Invalid other charge.",
-    },
-    { status: 400 }
-  );
-}
+    if (!otherResult.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid other charge.",
+        },
+        { status: 400 }
+      );
+    }
 
-const otherChargeUsd = otherResult.value;
+    const otherChargeUsd = otherResult.value;
 
     const otherChargeDescription =
       typeof body.otherChargeDescription === "string"
@@ -192,16 +190,6 @@ const otherChargeUsd = otherResult.value;
       }
 
       pricingBasis = shippingRate.pricingBasis;
-    }
-
-    if (!shippingRate && requestedPricingBasis !== "MANUAL") {
-      return NextResponse.json(
-        {
-          ok: false,
-          message: "No approved shipping rate exists for this shipment.",
-        },
-        { status: 400 }
-      );
     }
 
     const approvedPricing = await prisma.shipmentPricing.findFirst({
@@ -256,20 +244,36 @@ const otherChargeUsd = otherResult.value;
       billableQuantity = shipment.chargeableCbm;
       baseChargeUsd = billableQuantity.mul(unitRate);
     } else if (pricingBasis === "KG") {
-      chargeableWeight = parseRequiredDecimal(body.chargeableWeightKg, 3);
-      unitRate = shippingRate?.rateUsd ?? null;
+      chargeableWeight =
+        shipment.chargeableWeightKg ?? null;
 
-      if (!chargeableWeight || !unitRate) {
+      unitRate =
+        shippingRate?.rateUsd ?? null;
+
+      if (!chargeableWeight) {
         return NextResponse.json(
           {
             ok: false,
-            message: "Chargeable weight and KG rate are required.",
+            message:
+              "Chargeable weight is required for KG pricing.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (!unitRate) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message:
+              "A valid KG shipping rate is required.",
           },
           { status: 400 }
         );
       }
 
       billableQuantity = chargeableWeight;
+
       baseChargeUsd = billableQuantity.mul(unitRate);
     } else {
       manualCharge = parseRequiredDecimal(body.manualChargeUsd, 2);

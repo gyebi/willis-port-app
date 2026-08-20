@@ -14,6 +14,7 @@ type UpdateShipmentBody = {
   shippingMode?: unknown;
   goodsType?: unknown;
   weightKg?: unknown;
+  chargeableWeightKg?: unknown;
   declaredCbm?: unknown;
   actualCbm?: unknown;
   chargeableCbm?: unknown;
@@ -57,6 +58,9 @@ export async function PATCH(
     const weightKg =
       parseOptionalDecimal(body.weightKg);
 
+    const chargeableWeightKg =
+      parseOptionalDecimal(body.chargeableWeightKg);
+
     const declaredCbm =
       parseOptionalDecimal(body.declaredCbm);
 
@@ -68,6 +72,7 @@ export async function PATCH(
 
     if (
       weightKg === undefined ||
+      chargeableWeightKg === undefined ||
       declaredCbm === undefined ||
       actualCbm === undefined ||
       chargeableCbm === undefined
@@ -76,7 +81,7 @@ export async function PATCH(
         {
           ok: false,
           message:
-            "Weight or CBM contains an invalid value.",
+            "Weight, chargeable weight, or CBM contains an invalid value.",
         },
         { status: 400 }
       );
@@ -126,6 +131,7 @@ export async function PATCH(
           shippingMode,
 
           weightKg,
+          chargeableWeightKg,
           declaredCbm,
           actualCbm,
           chargeableCbm,
@@ -148,6 +154,8 @@ export async function PATCH(
           updatedShipment.goodsType,
         weightKg:
           updatedShipment.weightKg?.toString() ?? null,
+        chargeableWeightKg:
+          updatedShipment.chargeableWeightKg?.toString() ?? null,
         declaredCbm:
           updatedShipment.declaredCbm?.toString() ?? null,
         actualCbm:

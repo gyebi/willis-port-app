@@ -17,6 +17,7 @@ type PricingFormProps = {
   serviceType: string;
   goodsCategory: string;
   weightKg: string;
+  chargeableWeightKg: string;
   actualCbm: string;
   chargeableCbm: string;
 
@@ -48,6 +49,7 @@ export default function PricingForm({
   serviceType,
   goodsCategory,
   weightKg,
+  chargeableWeightKg,
   actualCbm,
   chargeableCbm,
   latestPricing,

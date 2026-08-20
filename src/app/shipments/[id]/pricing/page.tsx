@@ -113,6 +113,9 @@ export default async function PricingPage({
           serviceType={shipment.serviceType}
           goodsCategory={shipment.goodsCategory}
           weightKg={shipment.weightKg?.toString() ?? ""}
+          chargeableWeightKg={
+            shipment.chargeableWeightKg?.toString() ?? ""
+          }
           actualCbm={shipment.actualCbm?.toString() ?? ""}
           chargeableCbm={shipment.chargeableCbm?.toString() ?? ""}
 
@@ -122,7 +125,6 @@ export default async function PricingPage({
                 id: latestPricing.id,
                 status: latestPricing.status,
                 pricingBasis: latestPricing.pricingBasis,
-
                 chargeableWeightKg:
                   latestPricing.chargeableWeightKg?.toString() ?? "",
 

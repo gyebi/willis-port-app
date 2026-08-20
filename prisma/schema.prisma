@@ -32,7 +32,8 @@ model CustomerRequest {
   requestSource    String
   shippingMethod   String
   goodsCategory    String
-  weightKg         Decimal?
+  weightKg           Decimal?
+  chargeableWeightKg Decimal?
   volumeCbm        Decimal?
   goodsDescription String
   createdAt        DateTime      @default(now())

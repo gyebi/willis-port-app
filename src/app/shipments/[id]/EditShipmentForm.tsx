@@ -15,6 +15,7 @@ type EditShipmentFormProps = {
     goodsType: string;
     dateReceived: string;
     weightKg: string;
+    chargeableWeightKg: string;
     declaredCbm: string;
     actualCbm: string;
     chargeableCbm: string;
@@ -56,6 +57,7 @@ export default function EditShipmentForm({
             shippingMode: form.get("shippingMode"),
             goodsType: form.get("goodsType"),
             weightKg: form.get("weightKg"),
+            chargeableWeightKg: form.get("chargeableWeightKg"),
             declaredCbm: form.get("declaredCbm"),
             actualCbm: form.get("actualCbm"),
             chargeableCbm: form.get("chargeableCbm"),
@@ -99,6 +101,7 @@ export default function EditShipmentForm({
           goodsType: shipment.goodsType,
           dateReceived: shipment.dateReceived,
           weightKg: shipment.weightKg,
+          chargeableWeightKg: shipment.chargeableWeightKg,
           declaredCbm: shipment.declaredCbm,
           actualCbm: shipment.actualCbm,
           chargeableCbm: shipment.chargeableCbm,
