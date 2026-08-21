@@ -23,6 +23,31 @@ enum InvoiceStatus {
   CANCELLED
 }
 
+enum InvoiceDeliveryChannel {
+  EMAIL
+  WHATSAPP
+  SMS
+  MAIL
+  PRINT
+}
+
+enum InvoiceDeliveryStatus {
+  PENDING
+  INITIATED
+  SENT
+  FAILED
+  PRINT_REQUESTED
+  MAIL_PREPARED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  MOBILE_MONEY
+  CARD
+  OTHER
+}
+
 model CustomerRequest {
   id               String        @id @default(cuid())
   requestNumber    String        @unique
@@ -77,12 +102,81 @@ model Invoice {
 
   status InvoiceStatus @default(DRAFT)
 
-  lines InvoiceLine[]
+  lines      InvoiceLine[]
+  documents  InvoiceDocument[]
+  deliveries InvoiceDelivery[]
+  payments   Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([customerId])
+}
+
+model InvoiceDocument {
+  id String @id @default(cuid())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+
+  storagePath String
+  fileName    String
+
+  generatedAt DateTime @default(now())
+  version     Int      @default(1)
+  isIssued    Boolean  @default(true)
+
+  deliveries InvoiceDelivery[]
+
+  @@index([invoiceId])
+}
+
+model InvoiceDelivery {
+  id String @id @default(cuid())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+
+  invoiceDocumentId String?
+  invoiceDocument   InvoiceDocument? @relation(fields: [invoiceDocumentId], references: [id], onDelete: SetNull)
+
+  channel InvoiceDeliveryChannel
+
+  recipient String?
+
+  status InvoiceDeliveryStatus
+
+  sentAt   DateTime?
+  failedAt DateTime?
+
+  failureReason     String?
+  providerMessageId String?
+  notes             String?
+
+  createdAt DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([invoiceDocumentId])
+  @@index([channel])
+  @@index([status])
+}
+
+model Payment {
+  id String @id @default(cuid())
+
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+
+  amountGhs Decimal
+  method    PaymentMethod
+
+  reference String?
+  notes     String?
+  paidAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([method])
 }
 
 model InvoiceLine {

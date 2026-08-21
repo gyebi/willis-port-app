@@ -29,6 +29,19 @@
   margin-bottom: 28px;
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.logo {
+  width: 84px;
+  height: 84px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .eyebrow {
   margin: 0 0 8px;
   color: #f97316;

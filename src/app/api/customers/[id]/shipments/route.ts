@@ -10,6 +10,7 @@ type RouteContext = {
 
 type ShipmentBody = {
   trackingNumber?: unknown;
+  containerId?: unknown;
   description?: unknown;
   shippingMode?: unknown;
   serviceType?: unknown;
@@ -165,6 +166,27 @@ export async function POST(
       );
     }
 
+    const containerId = parseOptionalText(body.containerId);
+
+    if (containerId) {
+      const container = await prisma.container.findUnique({
+        where: { id: containerId },
+        select: { id: true },
+      });
+
+      if (!container) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message: "Container not found.",
+          },
+          {
+            status: 404,
+          }
+        );
+      }
+    }
+
     const shipmentNumber =
       createShipmentNumber();
 
@@ -188,6 +210,7 @@ export async function POST(
             parseOptionalText(
               body.goodsType
             ),
+          containerId,
 
           shippingMode,
           serviceType,

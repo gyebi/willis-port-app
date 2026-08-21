@@ -10,6 +10,7 @@ type RouteContext = {
 
 type UpdateShipmentBody = {
   trackingNumber?: unknown;
+  containerId?: unknown;
   description?: unknown;
   shippingMode?: unknown;
   serviceType?: unknown;
@@ -128,6 +129,25 @@ export async function PATCH(
       );
     }
 
+    const containerId = parseOptionalText(body.containerId);
+
+    if (containerId) {
+      const container = await prisma.container.findUnique({
+        where: { id: containerId },
+        select: { id: true },
+      });
+
+      if (!container) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message: "Container not found.",
+          },
+          { status: 404 }
+        );
+      }
+    }
+
     const shipment = await prisma.shipment.findUnique({
       where: { id },
       select: { id: true },
@@ -149,6 +169,7 @@ export async function PATCH(
         data: {
           trackingNumber:
             parseOptionalText(body.trackingNumber),
+          containerId,
 
           description:
             parseOptionalText(body.description),

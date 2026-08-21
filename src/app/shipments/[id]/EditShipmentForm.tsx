@@ -11,6 +11,7 @@ type EditShipmentFormProps = {
   shipment: {
     id: string;
     trackingNumber: string;
+    containerId: string | null;
     shippingMode: "SEA" | "AIR" | "UNKNOWN";
     serviceType: "STANDARD" | "EXPRESS";
     goodsCategory: "NORMAL" | "SPECIAL";
@@ -23,10 +24,16 @@ type EditShipmentFormProps = {
     chargeableCbm: string;
     description: string;
   };
+  containerOptions: Array<{
+    id: string;
+    containerNumber: string;
+    status: string;
+  }>;
 };
 
 export default function EditShipmentForm({
   shipment,
+  containerOptions,
 }: EditShipmentFormProps) {
   const router = useRouter();
 
@@ -60,6 +67,7 @@ export default function EditShipmentForm({
             serviceType: form.get("serviceType"),
             goodsCategory: form.get("goodsCategory"),
             goodsType: form.get("goodsType"),
+            containerId: form.get("containerId"),
             weightKg: form.get("weightKg"),
             chargeableWeightKg: form.get("chargeableWeightKg"),
             declaredCbm: form.get("declaredCbm"),
@@ -101,6 +109,7 @@ export default function EditShipmentForm({
         includeMeasurements={true}
           defaults={{
           trackingNumber: shipment.trackingNumber,
+          containerId: shipment.containerId ?? "",
           shippingMode: shipment.shippingMode,
           serviceType: shipment.serviceType,
           goodsCategory: shipment.goodsCategory,
@@ -113,6 +122,7 @@ export default function EditShipmentForm({
           chargeableCbm: shipment.chargeableCbm,
           description: shipment.description,
         }}
+        containerOptions={containerOptions}
       />
 
       {message && (

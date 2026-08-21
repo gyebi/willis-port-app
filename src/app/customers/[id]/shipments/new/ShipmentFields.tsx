@@ -3,6 +3,7 @@ type ShipmentFieldsProps = {
   gridClassName: string;
   defaults?: {
     trackingNumber?: string;
+    containerId?: string;
     shippingMode?: "SEA" | "AIR" | "UNKNOWN";
     serviceType?: "STANDARD" | "EXPRESS";
     goodsCategory?: "NORMAL" | "SPECIAL";
@@ -15,12 +16,18 @@ type ShipmentFieldsProps = {
     chargeableCbm?: string;
     description?: string;
   };
+  containerOptions?: Array<{
+    id: string;
+    containerNumber: string;
+    status: string;
+  }>;
   includeMeasurements?: boolean;
 };
 
 export default function ShipmentFields({
   gridClassName,
   defaults,
+  containerOptions = [],
   includeMeasurements = true,
 }: ShipmentFieldsProps) {
   return (
@@ -54,6 +61,31 @@ export default function ShipmentFields({
             <option value="UNKNOWN">
               Not yet known
             </option>
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="containerId">
+            Container
+          </label>
+
+          <select
+            id="containerId"
+            name="containerId"
+            defaultValue={defaults?.containerId ?? ""}
+          >
+            <option value="">
+              No container assigned
+            </option>
+
+            {containerOptions.map((container) => (
+              <option
+                key={container.id}
+                value={container.id}
+              >
+                {container.containerNumber} ({container.status})
+              </option>
+            ))}
           </select>
         </div>
 

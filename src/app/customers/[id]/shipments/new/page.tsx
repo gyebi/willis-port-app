@@ -30,6 +30,17 @@ export default async function NewShipmentPage({
     notFound();
   }
 
+  const containerOptions = await prisma.container.findMany({
+    orderBy: {
+      containerNumber: "asc",
+    },
+    select: {
+      id: true,
+      containerNumber: true,
+      status: true,
+    },
+  });
+
   return (
     <main className={styles.page}>
       <div className={styles.container}>
@@ -51,7 +62,10 @@ export default async function NewShipmentPage({
           </p>
         </header>
 
-        <NewShipmentForm customerId={customer.id} />
+        <NewShipmentForm
+          customerId={customer.id}
+          containerOptions={containerOptions}
+        />
       </div>
     </main>
   );

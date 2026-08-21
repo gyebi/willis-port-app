@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 import styles from "./page.module.css";
 
@@ -97,29 +97,8 @@ export default function PricingForm({
   const isApproved = pricingStatus === "APPROVED";
   const activeShippingRate = shippingRate;
   const structuredPricingAvailable = Boolean(activeShippingRate);
-  const structuredPricingBasis = activeShippingRate?.pricingBasis ?? null;
 
-  useEffect(() => {
-    if (isApproved || !structuredPricingAvailable) {
-      return;
-    }
 
-    if (!structuredPricingBasis) {
-      return;
-    }
-
-    if (
-      pricingBasis !== "MANUAL" &&
-      pricingBasis !== structuredPricingBasis
-    ) {
-      setPricingBasis(structuredPricingBasis);
-    }
-  }, [
-    isApproved,
-    pricingBasis,
-    structuredPricingAvailable,
-    structuredPricingBasis,
-  ]);
 
   const preview = useMemo(() => {
     const exchangeRate = Number(exchangeRateToGhs || 0);
@@ -190,10 +169,10 @@ export default function PricingForm({
     pricingBasis === "MANUAL"
       ? Number(manualChargeUsd || 0) > 0
       : Boolean(activeShippingRate) &&
-        pricingBasis === activeShippingRate?.pricingBasis &&
-        (pricingBasis === "KG"
-          ? Number(chargeableWeightKg || 0) > 0
-          : Number(chargeableCbm || 0) > 0);
+      pricingBasis === activeShippingRate?.pricingBasis &&
+      (pricingBasis === "KG"
+        ? Number(chargeableWeightKg || 0) > 0
+        : Number(chargeableCbm || 0) > 0);
 
   const hasValidExchangeRate = Number(exchangeRateToGhs) > 0;
 

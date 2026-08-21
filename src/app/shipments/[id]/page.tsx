@@ -27,6 +27,17 @@ export default async function ShipmentPage({
     },
   });
 
+  const containerOptions = await prisma.container.findMany({
+    orderBy: {
+      containerNumber: "asc",
+    },
+    select: {
+      id: true,
+      containerNumber: true,
+      status: true,
+    },
+  });
+
   if (!shipment) {
     notFound();
   }
@@ -65,13 +76,14 @@ export default async function ShipmentPage({
           </div>
 
           <EditShipmentForm
-            shipment={{
-              id: shipment.id,
-              trackingNumber:
-                shipment.trackingNumber ?? "",
-              shippingMode:
-                shipment.shippingMode,
-              serviceType: shipment.serviceType,
+          shipment={{
+            id: shipment.id,
+            trackingNumber:
+              shipment.trackingNumber ?? "",
+            containerId: shipment.containerId,
+            shippingMode:
+              shipment.shippingMode,
+            serviceType: shipment.serviceType,
               goodsCategory: shipment.goodsCategory,
               goodsType:
                 shipment.goodsType ?? "",
@@ -94,9 +106,10 @@ export default async function ShipmentPage({
                 "",
               description:
                 shipment.description ?? "",
-            }}
-          />
-        </section>
+          }}
+          containerOptions={containerOptions}
+        />
+      </section>
       </div>
     </main>
   );

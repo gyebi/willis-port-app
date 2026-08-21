@@ -7,10 +7,16 @@ import styles from "./page.module.css";
 
 type NewShipmentFormProps = {
   customerId: string;
+  containerOptions: Array<{
+    id: string;
+    containerNumber: string;
+    status: string;
+  }>;
 };
 
 export default function NewShipmentForm({
   customerId,
+  containerOptions,
 }: NewShipmentFormProps) {
   const router = useRouter();
 
@@ -42,6 +48,7 @@ export default function NewShipmentForm({
             serviceType: form.get("serviceType"),
             goodsCategory: form.get("goodsCategory"),
             goodsType: form.get("goodsType"),
+            containerId: form.get("containerId"),
             weightKg: form.get("weightKg"),
             chargeableWeightKg: form.get("chargeableWeightKg"),
             declaredCbm: form.get("declaredCbm"),
@@ -79,7 +86,10 @@ export default function NewShipmentForm({
       className={styles.form}
       onSubmit={handleSubmit}
     >
-      <ShipmentFields gridClassName={styles.grid} />
+      <ShipmentFields
+        gridClassName={styles.grid}
+        containerOptions={containerOptions}
+      />
 
       {error && (
         <p className={styles.error}>{error}</p>
