@@ -361,13 +361,7 @@ export function prepareInvoiceInput(
     };
   });
 
-  const chargeRows = lines
-  .filter(
-    (line) =>
-      line.lineType !== "SHIPMENT" &&
-      line.lineType !== "FREIGHT"
-  )
-  .map((line) => {
+  const chargeRows = lines.map((line) => {
     const shipment = line.shipment ?? null;
     const isFreightLine =
       line.lineType === "SHIPMENT" || line.lineType === "FREIGHT";
