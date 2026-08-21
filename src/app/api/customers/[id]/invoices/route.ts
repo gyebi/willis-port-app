@@ -120,11 +120,24 @@ export async function POST(
           (pricing) => {
             const lines = [];
 
+            const resolvedBillableQuantity =
+              pricing.pricingBasis === "CBM"
+                ? pricing.billableQuantity ??
+                pricing.chargeableCbm
+                : pricing.pricingBasis === "KG"
+                  ? pricing.billableQuantity ??
+                  pricing.chargeableWeightKg
+                  : null;
+
             const baseChargeUsd =
               pricing.pricingBasis === "MANUAL"
-                ? pricing.manualChargeUsd ?? new Prisma.Decimal(0)
-                : pricing.billableQuantity && pricing.unitRateUsd
-                  ? pricing.billableQuantity.mul(pricing.unitRateUsd)
+                ? pricing.manualChargeUsd ??
+                new Prisma.Decimal(0)
+                : resolvedBillableQuantity &&
+                  pricing.unitRateUsd
+                  ? resolvedBillableQuantity.mul(
+                    pricing.unitRateUsd
+                  )
                   : new Prisma.Decimal(0);
 
             const baseChargeGhs =
@@ -144,7 +157,7 @@ export async function POST(
 
               pricingBasis: pricing.pricingBasis,
               billableQuantity:
-                pricing.billableQuantity,
+                resolvedBillableQuantity,
               unitRateUsd: pricing.unitRateUsd,
 
               lineTotalUsd: baseChargeUsd,
