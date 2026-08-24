@@ -6,6 +6,10 @@ import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
 
+import { redirect } from "next/navigation";
+import { getSessionUser } from "@/lib/auth/get-session-user";
+
+
 const channelLabels = {
   EMAIL: "Email",
   WHATSAPP: "WhatsApp",
@@ -15,6 +19,17 @@ const channelLabels = {
 } as const;
 
 export default async function Home() {
+
+  const user = await getSessionUser();
+
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  if (user.role === "AGENT") {
+    redirect("/agent/entry");
+  }
+
   const [
     newRequests,
     receivedShipments,
