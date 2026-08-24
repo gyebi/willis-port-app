@@ -1,13 +1,15 @@
 export const dynamic = "force-dynamic";
 
+
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import styles from "./page.module.css";
-
-import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth/get-session-user";
+
+import ManagerSignOutButton from "./ManagerSignOutButton";
+import styles from "./page.module.css";
 
 
 const channelLabels = {
@@ -158,6 +160,7 @@ export default async function Home() {
           <Link href="/requests/new" className={styles.newRequestButton}>
             + New Request
           </Link>
+          <ManagerSignOutButton className={styles.managerSignOutButton} />
         </header>
 
         <section className={styles.section}>
