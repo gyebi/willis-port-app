@@ -39,6 +39,7 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+willis-port-review-firebase-adminsdk-fbsvc-a94a0a8db2.json
 *.pem
 *.key
 *.crt

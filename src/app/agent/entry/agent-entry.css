@@ -1,0 +1,187 @@
+
+.agentEntryPage {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 32px 20px;
+  color: #111;
+}
+
+.agentEntryShell {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.agentHeader {
+  background: #111;
+  color: #fff;
+  border-bottom: 6px solid #f58220;
+  padding: 28px 32px;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+}
+
+.agentHeader h1 {
+  margin: 4px 0 6px;
+  font-size: 30px;
+}
+
+.agentHeader p {
+  margin: 0;
+}
+
+.brandEyebrow {
+  color: #f58220;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.agentIdentity {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+  gap: 4px;
+}
+
+.agentIdentity span {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.formSection {
+  padding: 26px 32px;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.formSection h2 {
+  margin: 0 0 20px;
+  font-size: 18px;
+  border-left: 5px solid #f58220;
+  padding-left: 10px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 24px;
+}
+
+.formGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.formGrid input,
+.formGrid select {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  padding: 9px 11px;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-weight: 400;
+}
+
+.formGrid input:focus,
+.formGrid select:focus {
+  outline: 2px solid #f58220;
+  outline-offset: 1px;
+  border-color: #f58220;
+}
+
+.formGrid input[readonly] {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.wideField {
+  grid-column: 1 / -1;
+}
+
+.formActions {
+  padding: 24px 32px 32px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.formActions button {
+  border: 0;
+  border-radius: 7px;
+  background: #f58220;
+  color: #111;
+  font-weight: 800;
+  padding: 13px 28px;
+  cursor: pointer;
+}
+
+.formActions button:hover {
+  background: #e87512;
+}
+
+.formActions button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.formMessage {
+  margin: 20px 32px 0;
+  padding: 12px 14px;
+  border-left: 4px solid #f58220;
+  background: #fff4e9;
+}
+
+.formError {
+  margin: 20px 32px 0;
+  padding: 12px 14px;
+  border-left: 4px solid #b42318;
+  background: #fff1f0;
+  color: #8a1c13;
+}
+
+.signOutButton {
+  margin-top: 10px;
+  border: 1px solid #f58220;
+  border-radius: 7px;
+  background: transparent;
+  color: #f58220;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.signOutButton:hover {
+  background: #f58220;
+  color: #111;
+}
+
+@media (max-width: 700px) {
+  .agentHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .agentIdentity {
+    text-align: left;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .wideField {
+    grid-column: auto;
+  }
+}
+

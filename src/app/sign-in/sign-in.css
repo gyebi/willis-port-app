@@ -1,0 +1,281 @@
+
+.signInPage {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(520px, 0.95fr);
+  background: #ffffff;
+  color: #111111;
+}
+
+.signInHero {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #111111;
+}
+
+.signInHeroImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+.signInPanel {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background:
+    radial-gradient(
+      circle at 96% 17%,
+      rgba(245, 130, 32, 0.12) 0,
+      rgba(245, 130, 32, 0) 18%
+    ),
+    #ffffff;
+}
+
+.signInContent {
+  width: min(100%, 560px);
+}
+
+.brandBlock {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.brandLogo {
+  width: auto;
+  max-width: 290px;
+  height: auto;
+  margin: 0 auto 12px;
+  object-fit: contain;
+}
+
+.brandBlock p {
+  margin: 0;
+  color: #686868;
+  font-size: 16px;
+}
+
+.signInHeading {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.signInHeading h1 {
+  margin: 0;
+  font-size: clamp(36px, 4vw, 52px);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.signInCard {
+  padding: 32px;
+  border: 1px solid #e5e5e5;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
+}
+
+.signInCard label {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.signInCard label:not(:first-child) {
+  margin-top: 22px;
+}
+
+.inputWrap {
+  display: flex;
+  align-items: center;
+  min-height: 58px;
+  padding: 0 14px;
+  border: 1px solid #d8d8d8;
+  border-radius: 10px;
+  background: #ffffff;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.inputWrap:focus-within {
+  border-color: #f58220;
+  box-shadow: 0 0 0 3px rgba(245, 130, 32, 0.14);
+}
+
+.inputIcon {
+  flex: 0 0 auto;
+  margin-right: 11px;
+  font-size: 18px;
+  opacity: 0.65;
+}
+
+.inputWrap input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111111;
+  font: inherit;
+  font-size: 16px;
+}
+
+.inputWrap input::placeholder {
+  color: #aaaaaa;
+}
+
+.passwordToggle {
+  border: 0;
+  background: transparent;
+  color: #666666;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.signInButton {
+  width: 100%;
+  min-height: 58px;
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border: 0;
+  border-radius: 9px;
+  background: #ff5700;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    background 150ms ease;
+}
+
+.signInButton:hover:not(:disabled) {
+  background: #ed5000;
+  transform: translateY(-1px);
+}
+
+.signInButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.forgotPassword {
+  display: block;
+  margin: 20px auto 0;
+  border: 0;
+  background: transparent;
+  color: #f15a14;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.signInError {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border-left: 4px solid #d32f2f;
+  border-radius: 6px;
+  background: #fff2f2;
+  color: #a61b1b;
+  font-size: 14px;
+}
+
+.accessNote {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 20px;
+  align-items: center;
+  margin: 38px auto 14px;
+  max-width: 390px;
+}
+
+.accessNote span {
+  height: 1px;
+  background: #d7d7d7;
+}
+
+.accessNote strong {
+  color: #ff5700;
+  font-size: 20px;
+}
+
+.accessText {
+  margin: 0;
+  text-align: center;
+  color: #707070;
+  font-size: 15px;
+}
+
+.forgotPassword {
+  display: block;
+  margin: 20px auto 0;
+  text-align: center;
+  color: #f15a14;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.forgotPassword:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1000px) {
+  .signInPage {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .signInPanel {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 780px) {
+  .signInPage {
+    grid-template-columns: 1fr;
+  }
+
+  .signInHero {
+    min-height: 38vh;
+  }
+
+  .signInPanel {
+    min-height: auto;
+    padding: 34px 20px 46px;
+  }
+
+  .signInCard {
+    padding: 24px;
+  }
+
+  .brandBlock {
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .signInHero {
+    min-height: 30vh;
+  }
+
+  .signInPanel {
+    padding-inline: 16px;
+  }
+
+  .brandLogo {
+    max-width: 230px;
+  }
+
+  .signInHeading h1 {
+    font-size: 34px;
+  }
+}
+

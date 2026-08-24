@@ -339,6 +339,10 @@ model Shipment {
   actualCbm     Decimal?
   chargeableCbm Decimal?
 
+  shippingCostGhs      Decimal?
+  willisPortChargesGhs Decimal?
+  profitGhs            Decimal?
+
   dateReceived         DateTime?
   estimatedLoadingDate DateTime?
   eta                  DateTime?
@@ -355,11 +359,15 @@ model Shipment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  enteredByUserId String?
+  enteredByUser   AppUser? @relation("ShipmentEnteredBy", fields: [enteredByUserId], references: [id], onDelete: SetNull)
+
   @@index([customerId])
   @@index([trackingNumber])
   @@index([containerId])
   @@index([status])
   @@index([eta])
+  @@index([enteredByUserId])
 }
 
 enum ShipmentPricingBasis {
@@ -455,4 +463,23 @@ model ShipmentPricing {
   @@index([shipmentId])
   @@index([status])
   @@index([pricingBasis])
+}
+
+enum UserRole {
+  AGENT
+  MANAGER
+}
+
+model AppUser {
+  id          String   @id @default(cuid())
+  firebaseUid String   @unique
+  email       String   @unique
+  displayName String?
+  role        UserRole
+  active      Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  enteredShipments Shipment[] @relation("ShipmentEnteredBy")
 }
