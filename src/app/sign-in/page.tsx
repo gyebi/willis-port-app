@@ -75,14 +75,16 @@ export default function SignInPage() {
   return (
     <main className="signInPage">
       <section className="signInHero">
-        <Image
-          src="/willis-login-hero.png"
-          alt="Willis Port logistics professional"
-          fill
-          priority
-          sizes="50vw"
-          className="signInHeroImage"
-        />
+        <div className="heroCard">
+          <Image
+            src="/willis-login-hero.png"
+            alt="Willis Port logistics professional"
+            fill
+            priority
+            sizes="50vw"
+            className="signInHeroImage"
+          />
+        </div>
       </section>
 
       <section className="signInPanel">

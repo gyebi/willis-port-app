@@ -7,18 +7,6 @@
   color: #111111;
 }
 
-.signInHero {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-  background: #111111;
-}
-
-.signInHeroImage {
-  object-fit: cover;
-  object-position: center;
-}
-
 .signInPanel {
   min-height: 100vh;
   display: flex;
@@ -169,16 +157,6 @@
   opacity: 0.68;
 }
 
-.forgotPassword {
-  display: block;
-  margin: 20px auto 0;
-  border: 0;
-  background: transparent;
-  color: #f15a14;
-  font-size: 15px;
-  cursor: pointer;
-}
-
 .signInError {
   margin: 18px 0 0;
   padding: 12px 14px;
@@ -226,6 +204,52 @@
 
 .forgotPassword:hover {
   text-decoration: underline;
+}
+
+
+.signInHero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px;
+  background: linear-gradient(
+    135deg,
+    #111111 0%,
+    #1b1b1b 60%,
+    #2a2a2a 100%
+  );
+}
+
+.heroCard {
+  position: relative;
+  width: 100%;
+  height: min(86vh, 820px);
+  overflow: hidden;
+  border-radius: 24px;
+  background: #000;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.signInHeroImage {
+  object-fit: cover;
+  object-position: center;
+}
+
+
+@media (max-width: 780px) {
+  .signInHero {
+    min-height: auto;
+    padding: 18px;
+  }
+
+  .heroCard {
+    height: 42vh;
+    min-height: 280px;
+    border-radius: 18px;
+  }
 }
 
 @media (max-width: 1000px) {
@@ -278,4 +302,3 @@
     font-size: 34px;
   }
 }
-
