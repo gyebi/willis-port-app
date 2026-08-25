@@ -77,8 +77,8 @@ export default function SignInPage() {
       <section className="signInHero">
         <div className="heroCard">
           <Image
-            src="/willis-login-hero-2026.png"
-            alt="Willis Port logistics professional"
+            src="/willis-log.png"
+            alt="logo"
             fill
             priority
             sizes="50vw"
@@ -90,14 +90,7 @@ export default function SignInPage() {
       <section className="signInPanel">
         <div className="signInContent">
           <div className="brandBlock">
-            <Image
-              src="/willis-log.png"
-              alt="Willis Port Logistics"
-              width={250}
-              height={110}
-              priority
-              className="brandLogo"
-            />
+            
 
             <p>Authorized Willis Port staff only</p>
           </div>

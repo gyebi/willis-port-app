@@ -213,21 +213,16 @@
   align-items: center;
   justify-content: center;
   padding: 36px;
-  background: linear-gradient(
-    135deg,
-    #111111 0%,
-    #1b1b1b 60%,
-    #2a2a2a 100%
-  );
+
 }
 
 .heroCard {
   position: relative;
   width: 100%;
-  height: min(86vh, 820px);
+  height: min(100vh, 820px);
   overflow: hidden;
   border-radius: 24px;
-  background: #000;
+  background: #ffffff;
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.35),
     0 0 0 1px rgba(255, 255, 255, 0.06);
