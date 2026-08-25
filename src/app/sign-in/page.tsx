@@ -77,7 +77,7 @@ export default function SignInPage() {
       <section className="signInHero">
         <div className="heroCard">
           <Image
-            src="/willis-login-hero.png"
+            src="/willis-login-hero-2026.png"
             alt="Willis Port logistics professional"
             fill
             priority
