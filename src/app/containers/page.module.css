@@ -10,6 +10,17 @@
   margin: 0 auto;
 }
 
+.backLink {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: #555555;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  color: #f97316;
+}
+
 .header {
   display: flex;
   justify-content: space-between;

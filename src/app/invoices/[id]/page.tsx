@@ -143,6 +143,10 @@ export default async function InvoicePage({
   return (
     <main className={styles.page}>
       <div className={styles.container}>
+        <Link href="/" className={styles.backLink}>
+          ← Back to Dashboard
+        </Link>
+
         <Link
           href={`/customers/${invoice.customer.id}`}
           className={styles.backLink}

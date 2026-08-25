@@ -23,7 +23,13 @@ export default async function ShipmentPage({
     where: { id },
     include: {
       customer: true,
-      container: true,
+      container: true, enteredByUser: {
+        select: {
+          displayName: true,
+          email: true,
+          role: true,
+        },
+      },
     },
   });
 
@@ -45,6 +51,10 @@ export default async function ShipmentPage({
   return (
     <main className={styles.page}>
       <div className={styles.container}>
+        <Link href="/" className={styles.backLink}>
+          ← Back to Dashboard
+        </Link>
+
         <Link
           href={`/customers/${shipment.customerId}`}
           className={styles.backLink}
@@ -59,10 +69,17 @@ export default async function ShipmentPage({
 
           <h1>{shipment.shipmentNumber}</h1>
 
-          <p className={styles.customer}>
-            Customer:{" "}
-            <strong>{shipment.customer.name}</strong>
-          </p>
+          {shipment.enteredByUser ? (
+            <p className={styles.enteredBy}>
+              Entered by:{" "}
+              <strong>
+                {shipment.enteredByUser.displayName ??
+                  shipment.enteredByUser.email}
+              </strong>
+              {" · "}
+              {shipment.enteredByUser.role}
+            </p>
+          ) : null}
         </header>
 
         <section className={styles.card}>
@@ -76,22 +93,22 @@ export default async function ShipmentPage({
           </div>
 
           <EditShipmentForm
-          shipment={{
-            id: shipment.id,
-            trackingNumber:
-              shipment.trackingNumber ?? "",
-            containerId: shipment.containerId,
-            shippingMode:
-              shipment.shippingMode,
-            serviceType: shipment.serviceType,
+            shipment={{
+              id: shipment.id,
+              trackingNumber:
+                shipment.trackingNumber ?? "",
+              containerId: shipment.containerId,
+              shippingMode:
+                shipment.shippingMode,
+              serviceType: shipment.serviceType,
               goodsCategory: shipment.goodsCategory,
               goodsType:
                 shipment.goodsType ?? "",
               dateReceived:
                 shipment.dateReceived
                   ? shipment.dateReceived
-                      .toISOString()
-                      .slice(0, 10)
+                    .toISOString()
+                    .slice(0, 10)
                   : "",
               weightKg:
                 shipment.weightKg?.toString() ?? "",
@@ -106,10 +123,10 @@ export default async function ShipmentPage({
                 "",
               description:
                 shipment.description ?? "",
-          }}
-          containerOptions={containerOptions}
-        />
-      </section>
+            }}
+            containerOptions={containerOptions}
+          />
+        </section>
       </div>
     </main>
   );

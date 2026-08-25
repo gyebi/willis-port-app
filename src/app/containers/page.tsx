@@ -53,6 +53,10 @@ export default async function ContainersPage() {
   return (
     <main className={styles.page}>
       <div className={styles.container}>
+        <Link href="/" className={styles.backLink}>
+          ← Back to Dashboard
+        </Link>
+
         <header className={styles.header}>
           <div>
             <p className={styles.eyebrow}>WILLIS PORT</p>

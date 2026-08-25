@@ -22,6 +22,10 @@ export default async function CustomersPage() {
   return (
     <main className={styles.page}>
       <div className={styles.container}>
+        <Link href="/" className={styles.backLink}>
+          ← Back to Dashboard
+        </Link>
+
         <div className={styles.header}>
           <div>
             <p className={styles.eyebrow}>WILLIS PORT</p>

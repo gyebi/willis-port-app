@@ -33,6 +33,9 @@ export default async function Home() {
   }
 
   const [
+    customerCount,
+    shipmentCount,
+    containerCount,
     newRequests,
     receivedShipments,
     awaitingPricing,
@@ -41,11 +44,13 @@ export default async function Home() {
     notYetIssuedInvoices,
     sentOrAwaitingPaymentInvoices,
     paidInvoices,
-    recentRequests,
     deliveryChannelGroups,
     issuedInvoiceTotals,
     paymentTotals,
   ] = await Promise.all([
+    prisma.customer.count(),
+    prisma.shipment.count(),
+    prisma.container.count(),
     prisma.customerRequest.count({
       where: {
         status: "NEW",
@@ -100,12 +105,6 @@ export default async function Home() {
         status: "PAID",
       },
     }),
-    prisma.customerRequest.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 10,
-    }),
     prisma.invoiceDelivery.groupBy({
       by: ["channel"],
       _count: {
@@ -141,6 +140,45 @@ export default async function Home() {
     Object.entries(channelLabels).map(([channel]) => [channel, 0])
   ) as Record<keyof typeof channelLabels, number>;
 
+  const operations = [
+    {
+      title: "Customers",
+      href: "/customers",
+      value: customerCount.toLocaleString(),
+      description: "Customer directory and shipment history.",
+    },
+    {
+      title: "Shipments",
+      href: "/customers",
+      value: shipmentCount.toLocaleString(),
+      description: "Open shipment records from customer pages.",
+    },
+    {
+      title: "Pricing",
+      href: "/customers",
+      value: awaitingPricing.toLocaleString(),
+      description: "Review shipments waiting on pricing.",
+    },
+    {
+      title: "Invoices",
+      href: "/customers",
+      value: sentOrAwaitingPaymentInvoices.toLocaleString(),
+      description: "Open customer invoice workspaces.",
+    },
+    {
+      title: "Containers",
+      href: "/containers",
+      value: containerCount.toLocaleString(),
+      description: "Container planning and transit tracking.",
+    },
+    {
+      title: "Payments",
+      href: "/customers",
+      value: `GHS ${paymentsReceivedGhs.toString()}`,
+      description: "Review payment history in invoice workspaces.",
+    },
+  ] as const;
+
   for (const group of deliveryChannelGroups) {
     channelCounts[group.channel] = group._count._all;
   }
@@ -153,15 +191,36 @@ export default async function Home() {
             <p className={styles.eyebrow}>WILLIS PORT</p>
             <h1>Operations Dashboard</h1>
             <p className={styles.subtitle}>
-              Requests, shipments, invoices, delivery, and payment aggregation.
+              Central navigation for customer, shipment, invoice, container,
+              and payment operations.
             </p>
           </div>
 
-          <Link href="/requests/new" className={styles.newRequestButton}>
-            + New Request
-          </Link>
           <ManagerSignOutButton className={styles.managerSignOutButton} />
         </header>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <h2>Operations</h2>
+              <p>Jump into the main Manager work areas.</p>
+            </div>
+          </div>
+
+          <div className={styles.operationsGrid}>
+            {operations.map((operation) => (
+              <Link
+                key={operation.title}
+                href={operation.href}
+                className={styles.operationCard}
+              >
+                <p>{operation.title}</p>
+                <strong>{operation.value}</strong>
+                <span>{operation.description}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
 
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
@@ -260,58 +319,6 @@ export default async function Home() {
               </article>
             ))}
           </div>
-        </section>
-
-        <section className={styles.requests}>
-          <div className={styles.sectionHeader}>
-            <div>
-              <h2>Recent Requests</h2>
-              <p>Latest customer shipping requests.</p>
-            </div>
-          </div>
-
-          {recentRequests.length === 0 ? (
-            <div className={styles.emptyState}>
-              <h3>No requests yet</h3>
-              <p>
-                Create the first customer request to begin processing a shipment.
-              </p>
-
-              <Link href="/requests/new" className={styles.emptyButton}>
-                Create Request
-              </Link>
-            </div>
-          ) : (
-            <div className={styles.requestList}>
-              {recentRequests.map((request) => (
-                <Link
-                  key={request.id}
-                  href={`/requests/${request.id}`}
-                  className={styles.requestRow}
-                >
-                  <div>
-                    <strong>{request.customerName}</strong>
-                    <p>{request.requestNumber}</p>
-                  </div>
-
-                  <div>
-                    <span>{request.shippingMethod}</span>
-                    <p>{request.goodsCategory}</p>
-                  </div>
-
-                  <div>
-                    <span className={styles.status}>
-                      {request.status.replaceAll("_", " ")}
-                    </span>
-                  </div>
-
-                  <div>
-                    <span>{request.createdAt.toLocaleDateString()}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
         </section>
       </div>
     </main>

@@ -57,6 +57,10 @@ export default async function PricingPage({
   return (
     <main className={styles.page}>
       <div className={styles.container}>
+        <Link href="/" className={styles.backLink}>
+          ← Back to Dashboard
+        </Link>
+
         <Link
           href={`/customers/${shipment.customer.id}`}
           className={styles.backLink}

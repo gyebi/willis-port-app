@@ -44,6 +44,10 @@ export default async function NewShipmentPage({
   return (
     <main className={styles.page}>
       <div className={styles.container}>
+        <Link href="/" className={styles.backLink}>
+          ← Back to Dashboard
+        </Link>
+
         <Link
           href={`/customers/${customer.id}`}
           className={styles.backLink}
