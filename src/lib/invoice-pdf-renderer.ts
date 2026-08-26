@@ -76,10 +76,10 @@ type ShipmentSource = {
   actualCbm?: DecimalLike;
   chargeableCbm?: DecimalLike;
   container?:
-    | {
-        containerNumber: string;
-      }
-    | null;
+  | {
+    containerNumber: string;
+  }
+  | null;
 };
 
 export type InvoiceSource = {
@@ -104,6 +104,9 @@ export type InvoiceSource = {
 type PreparedChargeRow = {
   tracking: string | null;
   description: string;
+  basis: string;
+  quantity: string;
+  unitPriceUsd: string;
   amountUsd: string;
 };
 
@@ -161,7 +164,7 @@ const TEXT = rgb(0.12, 0.12, 0.12);
 const MUTED = rgb(0.37, 0.37, 0.37);
 const LINE = rgb(0.83, 0.83, 0.83);
 const SOFT = rgb(0.95, 0.95, 0.95);
-const DEFAULT_FONT_SIZE = 8.4;
+const DEFAULT_FONT_SIZE = 9.2;
 
 type ChargesTableMetrics = {
   x: number;
@@ -180,24 +183,26 @@ export async function generateIssuedInvoicePdf(
   const prepared = prepareInvoiceInput(invoice, businessSettings);
   const renderer = await createRenderer(prepared.business.businessName);
 
-  renderer.drawFullHeader(prepared.business, prepared.invoiceNumber);
+  renderer.drawFullHeader(
+    prepared.business,
+    prepared.invoiceNumber
+  );
+
   renderer.drawCustomerAndInvoiceDetails(
     prepared.customerLines,
     prepared.invoiceDetailLines
   );
 
-  if (prepared.shipments.length > 0) {
-    renderer.drawShipmentSections(prepared.shipments);
-  }
+  renderer.drawChargesTable(
+    prepared.chargeRows
+  );
 
-  renderer.drawChargesTable(prepared.chargeRows);
-  renderer.drawTotals(
+  renderer.drawPaymentSummary(
     prepared.subtotalUsd,
-    prepared.totals,
     prepared.exchangeRate,
     prepared.totalGhs
   );
-  renderer.drawPaymentDetails();
+
   renderer.drawCompactTerms(
     prepared.invoiceModes,
     prepared.hasSpecialGoods
@@ -395,23 +400,53 @@ export function prepareInvoiceInput(
 
   const chargeRows = lines.map((line) => {
     const shipment = line.shipment ?? null;
+
     const isFreightLine =
-      line.lineType === "SHIPMENT" || line.lineType === "FREIGHT";
+      line.lineType === "SHIPMENT" ||
+      line.lineType === "FREIGHT";
+
     const pricingBasis = resolvePricingBasis(
       line.pricingBasis ?? invoice.pricingBasis ?? null,
       shipment?.shippingMode ?? null
     );
 
+    const quantity =
+      line.billableQuantity !== null &&
+        line.billableQuantity !== undefined
+        ? formatAmount(line.billableQuantity)
+        : "";
+
+    const unitPrice =
+      line.unitRateUsd !== null &&
+        line.unitRateUsd !== undefined
+        ? formatMoney(line.unitRateUsd)
+        : "";
+
     return {
       tracking:
-        shipmentsById.size > 1
-          ? shipment?.trackingNumber ?? shipment?.shipmentNumber ?? null
-          : null,
+        shipment?.trackingNumber ??
+        shipment?.shipmentNumber ??
+        null,
+
       description: formatChargeDescription(line, {
         pricingBasis,
         shippingMode: shipment?.shippingMode ?? "UNKNOWN",
         isFreightLine,
       }),
+
+      basis:
+        pricingBasis === "CBM"
+          ? "CBM"
+          : pricingBasis === "KG"
+            ? "KG"
+            : pricingBasis === "MANUAL"
+              ? "Manual"
+              : "",
+
+      quantity,
+
+      unitPriceUsd: unitPrice,
+
       amountUsd: formatMoney(line.lineTotalUsd),
     };
   });
@@ -463,68 +498,25 @@ function formatChargeDescription(
   }
 ) {
   if (context.isFreightLine) {
-    const label = getFreightLabel(context.shippingMode);
-
-    if (context.pricingBasis === "CBM") {
-      const quantity = line.billableQuantity
-        ? formatAmount(line.billableQuantity)
-        : null;
-      const rate = line.unitRateUsd ? formatMoney(line.unitRateUsd) : null;
-
-      if (quantity && rate) {
-        return `${label} - ${quantity} CBM @ USD ${rate}`;
-      }
-
-      if (quantity) {
-        return `${label} - ${quantity} CBM`;
-      }
-
-      if (rate) {
-        return `${label} @ USD ${rate}`;
-      }
-
-      return label;
-    }
-
-    if (context.pricingBasis === "KG") {
-      const quantity = line.billableQuantity
-        ? formatAmount(line.billableQuantity)
-        : null;
-      const rate = line.unitRateUsd ? formatMoney(line.unitRateUsd) : null;
-
-      if (quantity && rate) {
-        return `${label} - ${quantity} kg @ USD ${rate}`;
-      }
-
-      if (quantity) {
-        return `${label} - ${quantity} kg`;
-      }
-
-      if (rate) {
-        return `${label} @ USD ${rate}`;
-      }
-
-      return label;
-    }
-
-    if (line.description?.trim()) {
-      return line.description.trim();
-    }
-
-    return "Manual Charge";
+    return getFreightLabel(context.shippingMode);
   }
 
   switch (line.lineType) {
     case "HANDLING":
       return "Handling";
+
     case "DOCUMENTATION":
       return "Documentation";
+
     case "SPECIAL_HANDLING":
       return "Special Handling";
+
     case "DELIVERY":
       return "Delivery";
+
     case "OTHER":
       return line.description?.trim() || "Other";
+
     default:
       return line.description?.trim() || "Charge";
   }
@@ -910,6 +902,123 @@ class InvoicePdfRenderer {
     this.y -= 16;
   }
 
+   drawShipmentSummaryBox(
+    shipments: PreparedShipmentSection[]
+  ) {
+    if (shipments.length === 0) {
+      return;
+    }
+
+    this.ensureSpace(86);
+
+    const boxHeight = shipments.length === 1 ? 76 : 94;
+    const boxY = this.y - boxHeight;
+
+    this.page.drawRectangle({
+      x: PAGE_MARGIN,
+      y: boxY,
+      width: CONTENT_WIDTH,
+      height: boxHeight,
+      color: rgb(0.97, 0.97, 0.97),
+      borderColor: LINE,
+      borderWidth: 0.8,
+    });
+
+    this.page.drawText("Shipment Details", {
+      x: PAGE_MARGIN + 12,
+      y: this.y - 20,
+      size: 12,
+      font: this.boldFont,
+      color: TEXT,
+    });
+
+    const shipment = shipments[0];
+
+    const combinedLines = [
+      ...shipment.leftLines,
+      ...shipment.rightLines,
+    ];
+
+    const tracking =
+      combinedLines.find((line) =>
+        line.startsWith("Tracking:")
+      ) ?? "";
+
+    const container =
+      combinedLines.find((line) =>
+        line.startsWith("Container:")
+      ) ?? "";
+
+    const loading =
+      combinedLines.find((line) =>
+        line.startsWith("Effective Loading Date:")
+      ) ?? "";
+
+    const eta =
+      combinedLines.find((line) =>
+        line.startsWith("ETA / Arrival:")
+      ) ?? "";
+
+    const collection =
+      combinedLines.find((line) =>
+        line.startsWith("Collection Date:")
+      ) ?? "";
+
+    const firstRowY = this.y - 43;
+
+    if (tracking) {
+      this.page.drawText(tracking, {
+        x: PAGE_MARGIN + 12,
+        y: firstRowY,
+        size: 9.5,
+        font: this.boldFont,
+        color: TEXT,
+      });
+    }
+
+    if (container) {
+      this.page.drawText(container, {
+        x: PAGE_MARGIN + CONTENT_WIDTH * 0.38,
+        y: firstRowY,
+        size: 9.5,
+        font: this.boldFont,
+        color: TEXT,
+      });
+    }
+
+    if (loading) {
+      this.page.drawText(loading, {
+        x: PAGE_MARGIN + 12,
+        y: firstRowY - 18,
+        size: 9,
+        font: this.regularFont,
+        color: TEXT,
+      });
+    }
+
+    if (eta) {
+      this.page.drawText(eta, {
+        x: PAGE_MARGIN + CONTENT_WIDTH * 0.38,
+        y: firstRowY - 18,
+        size: 9,
+        font: this.regularFont,
+        color: TEXT,
+      });
+    }
+
+    if (collection) {
+      this.page.drawText(collection, {
+        x: PAGE_MARGIN + CONTENT_WIDTH * 0.69,
+        y: firstRowY - 18,
+        size: 9,
+        font: this.regularFont,
+        color: TEXT,
+      });
+    }
+
+    this.y = boxY - 20;
+  }
+
   drawShipmentSections(shipments: PreparedShipmentSection[]) {
     for (const [index, shipment] of shipments.entries()) {
       const required = Math.max(
@@ -917,7 +1026,7 @@ class InvoicePdfRenderer {
         measureLines(
           shipments[index].rightLines,
           this.regularFont,
-          8.1,
+          9.0,
           CONTENT_WIDTH * 0.44
         )
       );
@@ -960,48 +1069,166 @@ class InvoicePdfRenderer {
       return;
     }
 
-    this.ensureSpace(70);
-    this.page.drawText("Charges", {
+    this.ensureSpace(90);
+
+    this.page.drawText("Item / Charge Details", {
       x: PAGE_MARGIN,
       y: this.y,
-      size: 9.5,
+      size: 11,
       font: this.boldFont,
       color: TEXT,
     });
-    this.y -= 12;
 
-    const tableHasTracking = rows.some((row) => row.tracking);
-    const table: ChargesTableMetrics = {
-      x: PAGE_MARGIN,
-      width: CONTENT_WIDTH,
-      trackingWidth: tableHasTracking ? 88 : 0,
-      amountWidth: 76,
-      headerHeight: 16,
-      rowGap: 7,
-      descriptionWidth: 0,
+    this.y -= 16;
+
+    const columns = {
+      tracking: 105,
+      description: 180,
+      basisQty: 80,
+      unitPrice: 70,
+      amount: 76,
     };
-    table.descriptionWidth =
-      table.width - table.amountWidth - (tableHasTracking ? table.trackingWidth : 0);
 
-    this.drawChargesTableHeader(table, tableHasTracking);
+    const headerHeight = 26;
 
-    for (const row of rows) {
-      const rowHeight = this.measureChargeRowHeight(
-        row,
-        table,
-        tableHasTracking
-      );
-      this.ensureSpace(rowHeight + 3, () =>
-        this.drawChargesTableHeader(table, tableHasTracking)
-      );
+    this.page.drawRectangle({
+      x: PAGE_MARGIN,
+      y: this.y - headerHeight,
+      width: CONTENT_WIDTH,
+      height: headerHeight,
+      color: rgb(0.16, 0.23, 0.30),
+    });
 
-      this.drawChargeRow(row, table, tableHasTracking, rowHeight);
-      this.y -= rowHeight + table.rowGap;
+    let x = PAGE_MARGIN;
+
+    const headers = [
+      ["Tracking", columns.tracking],
+      ["Description", columns.description],
+      ["Basis / Qty", columns.basisQty],
+      ["Unit Price", columns.unitPrice],
+      ["Amount", columns.amount],
+    ] as const;
+
+    for (const [label, width] of headers) {
+      this.page.drawText(label, {
+        x: x + 6,
+        y: this.y - 17,
+        size: 8.5,
+        font: this.boldFont,
+        color: rgb(1, 1, 1),
+      });
+
+      x += width;
     }
 
-    this.y += 5;
-    this.drawHorizontalRule(this.y);
-    this.y -= 16;
+    this.y -= headerHeight;
+
+    for (let index = 0; index < rows.length; index += 1) {
+      const row = rows[index];
+
+      this.ensureSpace(30);
+
+      const rowHeight = 28;
+
+      if (index % 2 === 0) {
+        this.page.drawRectangle({
+          x: PAGE_MARGIN,
+          y: this.y - rowHeight,
+          width: CONTENT_WIDTH,
+          height: rowHeight,
+          color: rgb(0.98, 0.98, 0.98),
+        });
+      }
+
+      let columnX = PAGE_MARGIN;
+
+      this.page.drawText(
+        row.tracking ?? "",
+        {
+          x: columnX + 6,
+          y: this.y - 18,
+          size: 8.4,
+          font: this.regularFont,
+          color: TEXT,
+        }
+      );
+
+      columnX += columns.tracking;
+
+      this.page.drawText(
+        row.description,
+        {
+          x: columnX + 6,
+          y: this.y - 18,
+          size: 8.4,
+          font: this.regularFont,
+          color: TEXT,
+        }
+      );
+
+      columnX += columns.description;
+
+      const basisQty =
+        row.quantity
+          ? `${row.basis} ${row.quantity}`
+          : row.basis;
+
+      this.page.drawText(
+        basisQty,
+        {
+          x: columnX + 6,
+          y: this.y - 18,
+          size: 8.4,
+          font: this.regularFont,
+          color: TEXT,
+        }
+      );
+
+      columnX += columns.basisQty;
+
+      this.page.drawText(
+        row.unitPriceUsd
+          ? `$${row.unitPriceUsd}`
+          : "",
+        {
+          x: columnX + 6,
+          y: this.y - 18,
+          size: 8.4,
+          font: this.regularFont,
+          color: TEXT,
+        }
+      );
+
+      columnX += columns.unitPrice;
+
+      this.page.drawText(
+        `$${row.amountUsd}`,
+        {
+          x: columnX + 6,
+          y: this.y - 18,
+          size: 8.5,
+          font: this.boldFont,
+          color: TEXT,
+        }
+      );
+
+      this.page.drawLine({
+        start: {
+          x: PAGE_MARGIN,
+          y: this.y - rowHeight,
+        },
+        end: {
+          x: PAGE_WIDTH - PAGE_MARGIN,
+          y: this.y - rowHeight,
+        },
+        thickness: 0.5,
+        color: LINE,
+      });
+
+      this.y -= rowHeight;
+    }
+
+    this.y -= 18;
   }
 
   drawTotals(
@@ -1125,6 +1352,111 @@ class InvoicePdfRenderer {
     this.y -= 20;
   }
 
+  drawPaymentSummary(
+  subtotalUsd: string,
+  exchangeRate: string,
+  totalGhs: string
+) {
+  const paymentBlocks =
+    approvedInvoicePaymentInstructions.map(
+      (instruction) => [
+        instruction.label,
+        ...instruction.lines,
+      ]
+    );
+
+  const leftBlock = paymentBlocks[0] ?? [];
+  const middleBlock = paymentBlocks[1] ?? [];
+
+  const boxHeight = 112;
+
+  this.ensureSpace(boxHeight + 20);
+
+  const boxY = this.y - boxHeight;
+
+  this.page.drawRectangle({
+    x: PAGE_MARGIN,
+    y: boxY,
+    width: CONTENT_WIDTH,
+    height: boxHeight,
+    color: rgb(0.97, 0.97, 0.97),
+    borderColor: rgb(0.16, 0.23, 0.30),
+    borderWidth: 1.2,
+  });
+
+  this.page.drawText("PAYMENT INFORMATION", {
+    x: PAGE_MARGIN + 12,
+    y: this.y - 20,
+    size: 10.5,
+    font: this.boldFont,
+    color: TEXT,
+  });
+
+  const contentY = this.y - 42;
+
+  this.drawBlock(
+    leftBlock,
+    PAGE_MARGIN + 12,
+    contentY,
+    CONTENT_WIDTH * 0.30,
+    8.5
+  );
+
+  this.drawBlock(
+    middleBlock,
+    PAGE_MARGIN + CONTENT_WIDTH * 0.36,
+    contentY,
+    CONTENT_WIDTH * 0.27,
+    8.5
+  );
+
+  const summaryX =
+    PAGE_MARGIN + CONTENT_WIDTH * 0.70;
+
+  this.page.drawText("PAYMENT SUMMARY", {
+    x: summaryX,
+    y: contentY,
+    size: 10,
+    font: this.boldFont,
+    color: TEXT,
+  });
+
+  this.page.drawText(
+    `Subtotal: USD ${subtotalUsd}`,
+    {
+      x: summaryX,
+      y: contentY - 22,
+      size: 9,
+      font: this.regularFont,
+      color: TEXT,
+    }
+  );
+
+  this.page.drawText(
+    `Rate: USD 1 = GHS ${exchangeRate}`,
+    {
+      x: summaryX,
+      y: contentY - 38,
+      size: 8.5,
+      font: this.regularFont,
+      color: MUTED,
+    }
+  );
+
+  this.page.drawText(
+    `GHS ${totalGhs}`,
+    {
+      x: summaryX,
+      y: contentY - 62,
+      size: 16,
+      font: this.boldFont,
+      color: ACCENT,
+    }
+  );
+
+  this.y = boxY - 22;
+}
+
   drawPaymentDetails() {
     const paymentBlocks = approvedInvoicePaymentInstructions.map((instruction) => [
       instruction.label,
@@ -1134,15 +1466,15 @@ class InvoicePdfRenderer {
     const leftBlock = paymentBlocks[0] ?? [];
     const rightBlock = paymentBlocks[1] ?? [];
     const maxHeight = Math.max(
-      measureLines(leftBlock, this.regularFont, 7.8, CONTENT_WIDTH * 0.44),
-      measureLines(rightBlock, this.regularFont, 7.8, CONTENT_WIDTH * 0.44)
+      measureLines(leftBlock, this.regularFont, 8.8, CONTENT_WIDTH * 0.44),
+      measureLines(rightBlock, this.regularFont, 8.8, CONTENT_WIDTH * 0.44)
     );
 
     this.ensureSpace(maxHeight + 34);
     this.page.drawText("Payment Details", {
       x: PAGE_MARGIN,
       y: this.y,
-      size: 9.4,
+      size: 10.5,
       font: this.boldFont,
       color: TEXT,
     });
@@ -1169,32 +1501,72 @@ class InvoicePdfRenderer {
   }
 
   drawCompactTerms(
-    invoiceModes: ShipmentMode[],
-    hasSpecialGoods: boolean
-  ) {
-    const notes = buildCompactTerms(invoiceModes, hasSpecialGoods);
+  invoiceModes: ShipmentMode[],
+  hasSpecialGoods: boolean
+) {
+  const notes =
+    buildCompactTerms(
+      invoiceModes,
+      hasSpecialGoods
+    );
 
-    if (notes.length === 0) {
-      return;
-    }
-
-    const required = measureLines(notes, this.regularFont, 7.4, CONTENT_WIDTH);
-    this.ensureSpace(required + 32);
-
-    this.page.drawText("Notes", {
-      x: PAGE_MARGIN,
-      y: this.y,
-      size: 9.2,
-      font: this.boldFont,
-      color: TEXT,
-    });
-    this.y -= 11;
-
-    this.y = this.drawTextLines(notes, PAGE_MARGIN, this.y, CONTENT_WIDTH, 7.4, {
-      bullet: true,
-      muted: true,
-    }) - 4;
+  if (notes.length === 0) {
+    return;
   }
+
+  const noteFontSize = 9.0;
+  const textWidth = CONTENT_WIDTH - 48;
+
+  const textHeight =
+    measureLines(
+      notes,
+      this.regularFont,
+      noteFontSize,
+      textWidth
+    );
+
+  const boxHeight =
+    Math.max(100, textHeight + 56);
+
+  this.ensureSpace(boxHeight + 20);
+
+  const boxY = this.y - boxHeight;
+
+  this.page.drawRectangle({
+    x: PAGE_MARGIN,
+    y: boxY,
+    width: CONTENT_WIDTH,
+    height: boxHeight,
+    color: rgb(1.0, 0.96, 0.84),
+    borderColor: rgb(0.96, 0.82, 0.45),
+    borderWidth: 0.8,
+  });
+
+  this.page.drawText(
+    "IMPORTANT REMARKS",
+    {
+      x: PAGE_MARGIN + 18,
+      y: this.y - 26,
+      size: 12,
+      font: this.boldFont,
+      color: rgb(0.45, 0.34, 0.08),
+    }
+  );
+
+  this.drawTextLines(
+    notes,
+    PAGE_MARGIN + 30,
+    this.y - 52,
+    textWidth,
+    noteFontSize,
+    {
+      bullet: true,
+      muted: false,
+    }
+  );
+
+  this.y = boxY - 14;
+}
 
   drawReceiptBody(input: ReceiptPdfInput) {
     this.ensureSpace(120);
@@ -1232,7 +1604,7 @@ class InvoicePdfRenderer {
     this.page.drawText(`GHS ${input.amountGhs}`, {
       x: PAGE_WIDTH - PAGE_MARGIN - 82,
       y: this.y + 6,
-      size: 10,
+      size: 11,
       font: this.boldFont,
       color: TEXT,
     });
@@ -1267,14 +1639,14 @@ class InvoicePdfRenderer {
       this.page.drawText("Tracking", {
         x: table.x + 1,
         y: bottomY + 3,
-        size: 7.5,
+        size: 8.7,
         font: this.boldFont,
         color: TEXT,
       });
       this.page.drawText("Description", {
         x: table.x + table.trackingWidth + 3,
         y: bottomY + 3,
-        size: 7.5,
+        size: 8.7,
         font: this.boldFont,
         color: TEXT,
       });
@@ -1282,7 +1654,7 @@ class InvoicePdfRenderer {
       this.page.drawText("Description", {
         x: table.x + 1,
         y: bottomY + 3,
-        size: 7.5,
+        size: 8.7,
         font: this.boldFont,
         color: TEXT,
       });
@@ -1291,7 +1663,7 @@ class InvoicePdfRenderer {
     this.page.drawText("USD", {
       x: table.x + table.width - table.amountWidth + 6,
       y: bottomY + 3,
-      size: 7.5,
+      size: 8.7,
       font: this.boldFont,
       color: TEXT,
     });
@@ -1330,7 +1702,7 @@ class InvoicePdfRenderer {
         table.x + 1,
         topY,
         table.trackingWidth - 4,
-        7.6
+        8.8
       );
     }
 
@@ -1339,13 +1711,13 @@ class InvoicePdfRenderer {
       descriptionX,
       topY,
       table.descriptionWidth - 8,
-      7.6
+      8.8
     );
 
     this.page.drawText(row.amountUsd, {
       x: amountX,
       y: topY,
-      size: 7.8,
+      size: 9.0,
       font: this.boldFont,
       color: TEXT,
     });
@@ -1376,7 +1748,7 @@ class InvoicePdfRenderer {
     const descHeight = measureParagraphHeight(
       row.description,
       this.regularFont,
-      7.6,
+      8.8,
       descriptionWidth
     );
     const trackingHeight = tableHasTracking && row.tracking
@@ -1468,45 +1840,45 @@ function buildCompactTerms(
 
   notes.push(
     termsByTitle.get("Payment Due") ??
-      "Payment is due upon receipt of the invoice."
+    "Payment is due upon receipt of the invoice."
   );
 
   if (hasAir) {
     notes.push(
       termsByTitle.get("Air Shipping") ??
-        "Air invoices must be settled within 3 days of the invoice date."
+      "Air invoices must be settled within 3 days of the invoice date."
     );
     notes.push(
       termsByTitle.get("Minimum Weight") ??
-        "Goods below 1 kg are charged as 1 kg; billable weight rules apply where relevant."
+      "Goods below 1 kg are charged as 1 kg; billable weight rules apply where relevant."
     );
   }
 
   if (hasSea) {
     notes.push(
       termsByTitle.get("Sea Shipping") ??
-        "Sea invoices must be settled within 10 days of the invoice date."
+      "Sea invoices must be settled within 10 days of the invoice date."
     );
     notes.push(
       termsByTitle.get("Minimum Sea Volume") ??
-        "Sea freight carries a minimum chargeable volume of 0.10 CBM where applicable."
+      "Sea freight carries a minimum chargeable volume of 0.10 CBM where applicable."
     );
   }
 
   if (hasSpecialGoods) {
     notes.push(
       termsByTitle.get("Special Goods") ??
-        "Special or regulated goods may attract additional handling or clearance charges."
+      "Special or regulated goods may attract additional handling or clearance charges."
     );
   }
 
   notes.push(
     termsByTitle.get("Customs & Clearance") ??
-      "Customs duties, taxes, inspection and clearance charges are excluded unless stated on the invoice."
+    "Customs duties, taxes, inspection and clearance charges are excluded unless stated on the invoice."
   );
   notes.push(
     termsByTitle.get("Payment Confirmation") ??
-      "Please send proof of payment after making payment."
+    "Please send proof of payment after making payment."
   );
 
   return notes;
