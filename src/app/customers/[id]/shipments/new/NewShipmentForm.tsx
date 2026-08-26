@@ -89,6 +89,7 @@ export default function NewShipmentForm({
       <ShipmentFields
         gridClassName={styles.grid}
         containerOptions={containerOptions}
+        requireDateReceived={true}
       />
 
       {error && (

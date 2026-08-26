@@ -29,6 +29,12 @@ export default async function ShipmentPage({
           email: true,
           role: true,
         },
+      }, estimatedLoadingOverrideByUser: {
+        select: {
+          displayName: true,
+          email: true,
+          role: true,
+        },
       },
     },
   });
@@ -92,7 +98,7 @@ export default async function ShipmentPage({
             </p>
           </div>
 
-          <EditShipmentForm
+            <EditShipmentForm
             shipment={{
               id: shipment.id,
               trackingNumber:
@@ -107,6 +113,56 @@ export default async function ShipmentPage({
               dateReceived:
                 shipment.dateReceived
                   ? shipment.dateReceived
+                    .toISOString()
+                    .slice(0, 10)
+                  : "",
+              calculatedEstimatedLoadingDate:
+                shipment.calculatedEstimatedLoadingDate
+                  ? shipment.calculatedEstimatedLoadingDate
+                    .toISOString()
+                    .slice(0, 10)
+                  : "",
+              estimatedLoadingDate:
+                shipment.estimatedLoadingDate
+                  ? shipment.estimatedLoadingDate
+                    .toISOString()
+                    .slice(0, 10)
+                  : "",
+              estimatedLoadingDateOverride:
+                shipment.estimatedLoadingDateOverride
+                  ? shipment.estimatedLoadingDateOverride
+                    .toISOString()
+                    .slice(0, 10)
+                  : "",
+              estimatedLoadingOverrideReason:
+                shipment.estimatedLoadingOverrideReason ?? "",
+              estimatedLoadingOverrideAt:
+                shipment.estimatedLoadingOverrideAt
+                  ? shipment.estimatedLoadingOverrideAt
+                    .toISOString()
+                  : "",
+              estimatedLoadingOverrideByUser:
+                shipment.estimatedLoadingOverrideByUser
+                  ? {
+                      displayName:
+                        shipment.estimatedLoadingOverrideByUser
+                          .displayName,
+                      email:
+                        shipment.estimatedLoadingOverrideByUser
+                          .email,
+                      role:
+                        shipment.estimatedLoadingOverrideByUser.role,
+                    }
+                  : null,
+              sortingCompleteDate:
+                shipment.sortingCompleteDate
+                  ? shipment.sortingCompleteDate
+                    .toISOString()
+                    .slice(0, 10)
+                  : "",
+              collectionDate:
+                shipment.collectionDate
+                  ? shipment.collectionDate
                     .toISOString()
                     .slice(0, 10)
                   : "",

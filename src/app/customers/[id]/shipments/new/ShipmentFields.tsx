@@ -22,6 +22,7 @@ type ShipmentFieldsProps = {
     status: string;
   }>;
   includeMeasurements?: boolean;
+  requireDateReceived?: boolean;
 };
 
 export default function ShipmentFields({
@@ -29,6 +30,7 @@ export default function ShipmentFields({
   defaults,
   containerOptions = [],
   includeMeasurements = true,
+  requireDateReceived = false,
 }: ShipmentFieldsProps) {
   return (
     <>
@@ -151,6 +153,7 @@ export default function ShipmentFields({
             name="dateReceived"
             type="date"
             defaultValue={defaults?.dateReceived ?? ""}
+            required={requireDateReceived}
           />
         </div>
 

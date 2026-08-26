@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getSessionUser } from "@/lib/auth/get-session-user";
+import { resolveShipmentSchedule } from "@/lib/shipment-scheduling";
 
 type RouteContext = {
   params: Promise<{
@@ -22,6 +24,8 @@ type UpdateShipmentBody = {
   actualCbm?: unknown;
   chargeableCbm?: unknown;
   dateReceived?: unknown;
+  estimatedLoadingDateOverride?: unknown;
+  estimatedLoadingOverrideReason?: unknown;
 };
 
 export async function PATCH(
@@ -150,7 +154,14 @@ export async function PATCH(
 
     const shipment = await prisma.shipment.findUnique({
       where: { id },
-      select: { id: true },
+      select: {
+        id: true,
+        dateReceived: true,
+        estimatedLoadingDate: true,
+        calculatedEstimatedLoadingDate: true,
+        estimatedLoadingDateOverride: true,
+        estimatedLoadingOverrideReason: true,
+      },
     });
 
     if (!shipment) {
@@ -160,6 +171,50 @@ export async function PATCH(
           message: "Shipment not found.",
         },
         { status: 404 }
+      );
+    }
+
+    const sessionUser = await getSessionUser();
+    const hasOverrideField = Object.prototype.hasOwnProperty.call(
+      body,
+      "estimatedLoadingDateOverride"
+    );
+    const overrideDate = hasOverrideField
+      ? parseOptionalDate(body.estimatedLoadingDateOverride)
+      : shipment.estimatedLoadingDateOverride;
+    const overrideReason = hasOverrideField
+      ? parseOptionalText(body.estimatedLoadingOverrideReason)
+      : shipment.estimatedLoadingOverrideReason;
+    const effectiveDateReceived = dateReceived ?? shipment.dateReceived;
+    const schedule = resolveShipmentSchedule({
+      dateReceived: effectiveDateReceived,
+      calculatedEstimatedLoadingDate:
+        shipment.calculatedEstimatedLoadingDate,
+      estimatedLoadingDate: shipment.estimatedLoadingDate,
+      estimatedLoadingDateOverride: overrideDate,
+    });
+
+    if (!schedule.dateReceived) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Invalid received date.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      hasOverrideField &&
+      overrideDate &&
+      sessionUser?.role !== "MANAGER"
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Only a manager can override the loading date.",
+        },
+        { status: 403 }
       );
     }
 
@@ -186,7 +241,24 @@ export async function PATCH(
           declaredCbm,
           actualCbm,
           chargeableCbm,
-          dateReceived,
+          dateReceived: schedule.dateReceived,
+          calculatedEstimatedLoadingDate:
+            schedule.calculatedEstimatedLoadingDate,
+          estimatedLoadingDate:
+            schedule.effectiveEstimatedLoadingDate,
+          estimatedLoadingDateOverride: overrideDate,
+          estimatedLoadingOverrideReason: overrideDate
+            ? overrideReason
+            : null,
+          estimatedLoadingOverrideAt: overrideDate
+            ? new Date()
+            : null,
+          estimatedLoadingOverrideByUserId: overrideDate
+            ? sessionUser?.id ?? null
+            : null,
+          eta: schedule.eta,
+          sortingCompleteDate: schedule.sortingCompleteDate,
+          collectionDate: schedule.collectionDate,
         },
       });
 
@@ -216,6 +288,21 @@ export async function PATCH(
           null,
         dateReceived:
           updatedShipment.dateReceived?.toISOString() ??
+          null,
+        calculatedEstimatedLoadingDate:
+          updatedShipment.calculatedEstimatedLoadingDate?.toISOString() ??
+          null,
+        estimatedLoadingDate:
+          updatedShipment.estimatedLoadingDate?.toISOString() ??
+          null,
+        estimatedLoadingDateOverride:
+          updatedShipment.estimatedLoadingDateOverride?.toISOString() ??
+          null,
+        sortingCompleteDate:
+          updatedShipment.sortingCompleteDate?.toISOString() ??
+          null,
+        collectionDate:
+          updatedShipment.collectionDate?.toISOString() ??
           null,
       },
     });

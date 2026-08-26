@@ -173,9 +173,9 @@ export default async function Home() {
     },
     {
       title: "Payments",
-      href: "/customers",
+      href: "/payments",
       value: `GHS ${paymentsReceivedGhs.toString()}`,
-      description: "Review payment history in invoice workspaces.",
+      description: "Manager payment queue and invoice collections.",
     },
   ] as const;
 

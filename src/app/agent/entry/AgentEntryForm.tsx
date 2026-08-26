@@ -3,6 +3,11 @@
 
 import { FormEvent, useState } from "react";
 import { firebaseAuth } from "@/lib/firebase/client";
+import {
+  formatDateOnly,
+  formatDaysLeftLabel,
+  resolveShipmentSchedule,
+} from "@/lib/shipment-scheduling";
 
 type AgentEntryFormProps = {
   userName: string;
@@ -16,10 +21,9 @@ export default function AgentEntryForm({
   const [isSaving, setIsSaving] = useState(false);
 
   const [dateReceived, setDateReceived] = useState("");
-  const [eta, setEta] = useState("");
-  const [estimatedLoadingDate, setEstimatedLoadingDate] = useState("");
-  const [month, setMonth] = useState("");
-  const [daysLeft, setDaysLeft] = useState("");
+  const schedule = resolveShipmentSchedule({
+    dateReceived,
+  });
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -45,17 +49,10 @@ export default function AgentEntryForm({
           weight: formData.get("weight"),
           cbm: formData.get("cbm"),
           dateReceived: formData.get("dateReceived"),
-          estimatedLoadingDate: formData.get("estimatedLoadingDate"),
-          eta: formData.get("eta"),
           goodsType: formData.get("goodsType"),
           actualCbm: formData.get("actualCbm"),
           chargeableCbm: formData.get("chargeableCbm"),
-          shippingCost: formData.get("shippingCost"),
-          willisPortCharges: formData.get("willisPortCharges"),
-          profit: formData.get("profit"),
           container: formData.get("container"),
-          month: formData.get("month"),
-          daysLeft: formData.get("daysLeft"),
           status: formData.get("status"),
         }),
       });
@@ -74,66 +71,10 @@ export default function AgentEntryForm({
       );
       form.reset();
       setDateReceived("");
-      setEta("");
-      setEstimatedLoadingDate("");
-      setMonth("");
-      setDaysLeft("");
     } catch {
       setError("Unable to save entry. Please try again.");
     } finally {
       setIsSaving(false);
-    }
-  }
-
-  function calculateShipmentDates(receivedDate: string) {
-    if (!receivedDate) {
-      setEta("");
-      setEstimatedLoadingDate("");
-      setMonth("");
-      setDaysLeft("");
-      return;
-    }
-
-    const received = new Date(`${receivedDate}T00:00:00`);
-
-    if (Number.isNaN(received.getTime())) {
-      return;
-    }
-
-    const etaDate = new Date(received);
-    etaDate.setDate(etaDate.getDate() + 60);
-
-    const loadingDate = new Date(etaDate);
-    loadingDate.setDate(loadingDate.getDate() + 7);
-
-    const formatDate = (date: Date) =>
-      date.toISOString().slice(0, 10);
-
-    setEta(formatDate(etaDate));
-    setEstimatedLoadingDate(formatDate(loadingDate));
-
-    setMonth(
-      etaDate.toLocaleString("en-US", {
-        month: "long",
-        year: "numeric",
-      })
-    );
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const differenceMs = etaDate.getTime() - today.getTime();
-
-    const differenceDays = Math.ceil(
-      differenceMs / (1000 * 60 * 60 * 24)
-    );
-
-    if (differenceDays > 0) {
-      setDaysLeft(`${differenceDays} DAYS LEFT`);
-    } else if (differenceDays === 0) {
-      setDaysLeft("ARRIVES TODAY");
-    } else {
-      setDaysLeft(`${Math.abs(differenceDays)} DAYS PAST ETA`);
     }
   }
 
@@ -291,17 +232,22 @@ export default function AgentEntryForm({
                   name="dateReceived"
                   type="date"
                   value={dateReceived}
+                  required
                   onChange={(event) => {
-                    const value = event.target.value;
-                    setDateReceived(value);
-                    calculateShipmentDates(value);
+                    setDateReceived(event.target.value);
                   }}
                 />
               </label>
 
               <label>
-                ESTIMATED LOADING DATE
-                <input name="estimatedLoadingDate" type="date" />
+                CALCULATED EST. LOADING DATE
+                <input
+                  type="date"
+                  value={formatDateOnly(
+                    schedule.calculatedEstimatedLoadingDate
+                  )}
+                  readOnly
+                />
               </label>
 
               <label>
@@ -309,7 +255,25 @@ export default function AgentEntryForm({
                 <input
                   name="eta"
                   type="date"
-                  value={eta}
+                  value={formatDateOnly(schedule.eta)}
+                  readOnly
+                />
+              </label>
+
+              <label>
+                SORTING COMPLETE
+                <input
+                  type="date"
+                  value={formatDateOnly(schedule.sortingCompleteDate)}
+                  readOnly
+                />
+              </label>
+
+              <label>
+                COLLECTION DATE
+                <input
+                  type="date"
+                  value={formatDateOnly(schedule.collectionDate)}
                   readOnly
                 />
               </label>
@@ -317,9 +281,8 @@ export default function AgentEntryForm({
               <label>
                 MONTH
                 <input
-                  name="month"
                   type="text"
-                  value={month}
+                  value={schedule.monthLabel ?? ""}
                   readOnly
                 />
               </label>
@@ -327,45 +290,63 @@ export default function AgentEntryForm({
               <label>
                 DAYS LEFT
                 <input
-                  name="daysLeft"
                   type="text"
-                  value={daysLeft}
+                  value={formatDaysLeftLabel(
+                    schedule.daysLeftToCollection
+                  )}
                   readOnly
                 />
               </label>
-            </div>
-          </section>
 
-          <section className="formSection">
-            <h2>Financial Information</h2>
-
-            <div className="formGrid">
               <label>
-                SHIPPING COST
+                DAYS TO LOADING
                 <input
-                  name="shippingCost"
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  value={
+                    schedule.daysToLoading === null
+                      ? ""
+                      : `${schedule.daysToLoading} DAYS`
+                  }
+                  readOnly
                 />
               </label>
 
               <label>
-                WILLISPORT CHARGES
+                TRANSIT DAYS
                 <input
-                  name="willisPortCharges"
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  value={
+                    schedule.transitDays === null
+                      ? ""
+                      : `${schedule.transitDays} DAYS`
+                  }
+                  readOnly
                 />
               </label>
 
               <label>
-                PROFIT
+                SORTING DAYS
                 <input
-                  name="profit"
-                  type="number"
-                  step="0.01"
+                  type="text"
+                  value={
+                    schedule.sortingDays === null
+                      ? ""
+                      : `${schedule.sortingDays} DAYS`
+                  }
+                  readOnly
+                />
+              </label>
+
+              <label>
+                TOTAL TO COLLECTION
+                <input
+                  type="text"
+                  value={
+                    schedule.totalDaysToCollection === null
+                      ? ""
+                      : `${schedule.totalDaysToCollection} DAYS`
+                  }
+                  readOnly
                 />
               </label>
             </div>

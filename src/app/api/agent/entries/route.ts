@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth/get-session-user";
+import { resolveShipmentSchedule } from "@/lib/shipment-scheduling";
 
 const ALLOWED_SHIPPING_MODES = ["SEA", "AIR", "UNKNOWN"] as const;
 
@@ -141,15 +142,15 @@ export async function POST(request: Request) {
     const actualCbm = positiveDecimalString(body.actualCbm);
     const chargeableCbm = positiveDecimalString(body.chargeableCbm);
 
-    const shippingCostGhs = positiveDecimalString(body.shippingCost);
-    const willisPortChargesGhs = positiveDecimalString(
-      body.willisPortCharges
-    );
-    const profitGhs = decimalString(body.profit);
-
     const dateReceived = parseDate(body.dateReceived);
-    const estimatedLoadingDate = parseDate(body.estimatedLoadingDate);
-    const eta = parseDate(body.eta);
+    const schedule = resolveShipmentSchedule({ dateReceived });
+
+    if (!schedule.dateReceived) {
+      return NextResponse.json(
+        { error: "A valid received date is required." },
+        { status: 400 }
+      );
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       let customer = await tx.customer.findFirst({
@@ -195,8 +196,9 @@ export async function POST(request: Request) {
               containerNumber,
               shippingMode:
                 shippingMode as "SEA" | "AIR" | "UNKNOWN",
-              estimatedLoadingDate,
-              eta,
+              estimatedLoadingDate:
+                schedule.effectiveEstimatedLoadingDate,
+              eta: schedule.eta,
             },
           }));
 
@@ -217,8 +219,18 @@ export async function POST(request: Request) {
           actualCbm,
           chargeableCbm,
           dateReceived,
-          estimatedLoadingDate,
-          eta,
+          calculatedEstimatedLoadingDate:
+            schedule.calculatedEstimatedLoadingDate,
+          estimatedLoadingDate:
+            schedule.effectiveEstimatedLoadingDate,
+          estimatedLoadingDateOverride: null,
+          estimatedLoadingOverrideReason: null,
+          estimatedLoadingOverrideAt: null,
+          estimatedLoadingOverrideByUserId: null,
+          eta: schedule.eta,
+          sortingCompleteDate:
+            schedule.sortingCompleteDate,
+          collectionDate: schedule.collectionDate,
           status:
             status as
               | "RECEIVED"
@@ -228,13 +240,8 @@ export async function POST(request: Request) {
               | "CUSTOMS_CLEARANCE"
               | "WAREHOUSE"
               | "DELIVERED"
-              | "CANCELLED",
+          | "CANCELLED",
           containerId,
-
-          shippingCostGhs,
-          willisPortChargesGhs,
-          profitGhs,
-
           enteredByUserId: user.id,
         },
       });
@@ -278,4 +285,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

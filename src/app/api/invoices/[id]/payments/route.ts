@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { getSessionUser } from "@/lib/auth/get-session-user";
 
 type RouteContext = {
   params: Promise<{
@@ -107,11 +108,17 @@ export async function POST(
       );
     }
 
+    const sessionUser = await getSessionUser();
+    const paidAt = new Date();
+
     const payment = await prisma.payment.create({
       data: {
         invoiceId,
         amountGhs: amountResult.value,
         method,
+        amount: amountResult.value,
+        paymentDate: paidAt,
+        paymentMethod: method,
         reference:
           typeof body.reference === "string"
             ? body.reference.trim() || null
@@ -120,6 +127,8 @@ export async function POST(
           typeof body.notes === "string"
             ? body.notes.trim() || null
             : null,
+        paidAt,
+        receivedByUserId: sessionUser?.id ?? null,
       },
     });
 
@@ -156,8 +165,13 @@ export async function POST(
       payment: {
         id: payment.id,
         amountGhs: payment.amountGhs.toString(),
+        amount: payment.amount?.toString() ?? payment.amountGhs.toString(),
         method: payment.method,
-        paidAt: payment.paidAt.toISOString(),
+        paymentMethod:
+          payment.paymentMethod ?? payment.method,
+        paymentDate:
+          (payment.paymentDate ?? payment.paidAt).toISOString(),
+        receivedByUserId: payment.receivedByUserId,
       },
       balanceGhs: balance.lessThan(0) ? "0" : balance.toString(),
       invoiceStatus: nextStatus,

@@ -174,9 +174,16 @@ model Payment {
   notes     String?
   paidAt    DateTime @default(now())
   createdAt DateTime @default(now())
+  amount     Decimal?
+  paymentDate DateTime?
+  paymentMethod PaymentMethod?
+  receivedByUserId String?
+  receivedByUser   AppUser? @relation("PaymentReceivedBy", fields: [receivedByUserId], references: [id], onDelete: SetNull)
+  updatedAt DateTime @updatedAt
 
   @@index([invoiceId])
   @@index([method])
+  @@index([receivedByUserId])
 }
 
 model InvoiceLine {
@@ -344,8 +351,16 @@ model Shipment {
   profitGhs            Decimal?
 
   dateReceived         DateTime?
+  calculatedEstimatedLoadingDate DateTime?
   estimatedLoadingDate DateTime?
+  estimatedLoadingDateOverride DateTime?
+  estimatedLoadingOverrideReason String?
+  estimatedLoadingOverrideAt DateTime?
+  estimatedLoadingOverrideByUserId String?
+  estimatedLoadingOverrideByUser   AppUser? @relation("ShipmentLoadingOverrideBy", fields: [estimatedLoadingOverrideByUserId], references: [id], onDelete: SetNull)
   eta                  DateTime?
+  sortingCompleteDate  DateTime?
+  collectionDate       DateTime?
 
   status ShipmentStatus @default(RECEIVED)
 
@@ -367,7 +382,9 @@ model Shipment {
   @@index([containerId])
   @@index([status])
   @@index([eta])
+  @@index([collectionDate])
   @@index([enteredByUserId])
+  @@index([estimatedLoadingOverrideByUserId])
 }
 
 enum ShipmentPricingBasis {
@@ -482,4 +499,6 @@ model AppUser {
   updatedAt DateTime @updatedAt
 
   enteredShipments Shipment[] @relation("ShipmentEnteredBy")
+  receivedPayments Payment[] @relation("PaymentReceivedBy")
+  loadingDateOverrides Shipment[] @relation("ShipmentLoadingOverrideBy")
 }

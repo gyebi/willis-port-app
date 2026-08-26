@@ -42,10 +42,10 @@ export async function GET(
 
     const receiptBytes = await generateReceiptPdf({
       receiptNumber: `RCPT-${payment.id.slice(0, 8).toUpperCase()}`,
-      paidAt: payment.paidAt.toLocaleDateString("en-GB"),
-      paymentMethod: payment.method.replaceAll("_", " "),
+      paidAt: (payment.paymentDate ?? payment.paidAt).toLocaleDateString("en-GB"),
+      paymentMethod: (payment.paymentMethod ?? payment.method).replaceAll("_", " "),
       paymentReference: payment.reference,
-      amountGhs: payment.amountGhs.toString(),
+      amountGhs: (payment.amount ?? payment.amountGhs).toString(),
       invoiceNumber: payment.invoice.invoiceNumber,
       customerName: payment.invoice.customer.name,
       business: {

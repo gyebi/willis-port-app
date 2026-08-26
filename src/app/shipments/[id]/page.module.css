@@ -83,6 +83,86 @@
   gap: 24px;
 }
 
+.scheduleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid #f0d8c0;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffaf4, #fff4e9);
+}
+
+.scheduleHeader h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.scheduleHeader p {
+  margin: 0;
+  color: #666;
+}
+
+.scheduleGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.scheduleCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid #edd3ba;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.scheduleCard span {
+  color: #7a5a40;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.scheduleCard strong {
+  font-size: 15px;
+}
+
+.overridePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  border: 1px dashed #efb97e;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.toggleRow input {
+  width: 16px;
+  height: 16px;
+}
+
+.auditNote {
+  margin: 0;
+  color: #75543b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -193,6 +273,10 @@
   }
 
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scheduleGrid {
     grid-template-columns: 1fr;
   }
 

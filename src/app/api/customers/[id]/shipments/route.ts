@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { resolveShipmentSchedule } from "@/lib/shipment-scheduling";
 
 type RouteContext = {
   params: Promise<{
@@ -151,10 +152,10 @@ export async function POST(
       );
     }
 
-    const dateReceived =
-      parseOptionalDate(body.dateReceived);
+    const dateReceived = parseOptionalDate(body.dateReceived);
+    const schedule = resolveShipmentSchedule({ dateReceived });
 
-    if (dateReceived === undefined) {
+    if (!schedule.dateReceived) {
       return NextResponse.json(
         {
           ok: false,
@@ -222,7 +223,15 @@ export async function POST(
           actualCbm,
           chargeableCbm,
 
-          dateReceived,
+          dateReceived: schedule.dateReceived,
+          calculatedEstimatedLoadingDate:
+            schedule.calculatedEstimatedLoadingDate,
+          estimatedLoadingDate:
+            schedule.effectiveEstimatedLoadingDate,
+          eta: schedule.eta,
+          sortingCompleteDate:
+            schedule.sortingCompleteDate,
+          collectionDate: schedule.collectionDate,
 
           status: "RECEIVED",
         },
