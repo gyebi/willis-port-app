@@ -2,10 +2,13 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireManagerUser } from "@/lib/auth/require-manager";
 
 import styles from "./page.module.css";
 
 export default async function ContainersPage() {
+  await requireManagerUser();
+
   const containers = await prisma.container.findMany({
     orderBy: [
       {

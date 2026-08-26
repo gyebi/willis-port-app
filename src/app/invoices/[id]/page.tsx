@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { requireManagerUser } from "@/lib/auth/require-manager";
 
 import InvoiceWorkspace from "./InvoiceWorkspace";
 import styles from "./page.module.css";
@@ -19,6 +20,8 @@ type InvoicePageProps = {
 export default async function InvoicePage({
   params,
 }: InvoicePageProps) {
+  await requireManagerUser();
+
   const { id } = await params;
 
   const invoice = await prisma.invoice.findUnique({

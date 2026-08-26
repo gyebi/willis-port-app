@@ -19,6 +19,28 @@ const ALLOWED_STATUSES = [
   "CANCELLED",
 ] as const;
 
+type AgentEntryBody = {
+  existingCustomerId?: unknown;
+  customerId?: unknown;
+  customerName?: unknown;
+  client?: unknown;
+  phone?: unknown;
+  whatsapp?: unknown;
+  email?: unknown;
+  address?: unknown;
+  trackingNumber?: unknown;
+  description?: unknown;
+  shippingMode?: unknown;
+  weight?: unknown;
+  cbm?: unknown;
+  dateReceived?: unknown;
+  goodsType?: unknown;
+  actualCbm?: unknown;
+  chargeableCbm?: unknown;
+  container?: unknown;
+  status?: unknown;
+};
+
 function cleanString(value: unknown): string | null {
   if (typeof value !== "string") {
     return null;
@@ -95,9 +117,27 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
+    let body: AgentEntryBody;
 
-    const client = cleanString(body.client);
+    try {
+      body = (await request.json()) as AgentEntryBody;
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid request body." },
+        { status: 400 }
+      );
+    }
+
+    const existingCustomerId =
+      cleanString(body.existingCustomerId) ??
+      cleanString(body.customerId);
+    const customerName =
+      cleanString(body.customerName) ??
+      cleanString(body.client);
+    const phone = cleanString(body.phone);
+    const whatsapp = cleanString(body.whatsapp);
+    const email = cleanString(body.email);
+    const address = cleanString(body.address);
     const trackingNumber = cleanString(body.trackingNumber);
     const description = cleanString(body.description);
     const goodsType = cleanString(body.goodsType);
@@ -106,9 +146,16 @@ export async function POST(request: Request) {
     const shippingMode = cleanString(body.shippingMode);
     const status = cleanString(body.status);
 
-    if (!client) {
+    if (!customerName) {
       return NextResponse.json(
-        { error: "Client is required." },
+        { error: "Customer name is required." },
+        { status: 400 }
+      );
+    }
+
+    if (!phone) {
+      return NextResponse.json(
+        { error: "Customer phone is required." },
         { status: 400 }
       );
     }
@@ -153,22 +200,45 @@ export async function POST(request: Request) {
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      let customer = await tx.customer.findFirst({
-        where: {
-          name: {
-            equals: client,
-            mode: "insensitive",
-          },
-        },
-        orderBy: {
-          createdAt: "asc",
-        },
-      });
+      let customer: {
+        id: string;
+        name: string;
+      };
 
-      if (!customer) {
+      if (existingCustomerId) {
+        const existingCustomer = await tx.customer.findUnique({
+          where: {
+            id: existingCustomerId,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (!existingCustomer) {
+          throw new Error("CUSTOMER_NOT_FOUND");
+        }
+
+        customer = await tx.customer.update({
+          where: {
+            id: existingCustomerId,
+          },
+          data: {
+            name: customerName,
+            phone,
+            whatsapp,
+            email,
+            address,
+          },
+        });
+      } else {
         customer = await tx.customer.create({
           data: {
-            name: client,
+            name: customerName,
+            phone,
+            whatsapp,
+            email,
+            address,
           },
         });
       }
@@ -255,6 +325,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: true,
+        customerId: result.customer.id,
         shipment: {
           id: result.shipment.id,
           shipmentNumber: result.shipment.shipmentNumber,
@@ -264,6 +335,16 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === "CUSTOMER_NOT_FOUND"
+    ) {
+      return NextResponse.json(
+        { error: "Selected customer was not found." },
+        { status: 404 }
+      );
+    }
+
     if (
       error instanceof Error &&
       error.message === "CONTAINER_MODE_MISMATCH"

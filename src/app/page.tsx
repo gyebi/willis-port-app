@@ -2,11 +2,10 @@ export const dynamic = "force-dynamic";
 
 
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import { getSessionUser } from "@/lib/auth/get-session-user";
+import { requireManagerUser } from "@/lib/auth/require-manager";
 
 import ManagerSignOutButton from "./ManagerSignOutButton";
 import styles from "./page.module.css";
@@ -21,16 +20,7 @@ const channelLabels = {
 } as const;
 
 export default async function Home() {
-
-  const user = await getSessionUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  if (user.role === "AGENT") {
-    redirect("/agent/entry");
-  }
+  await requireManagerUser();
 
   const [
     customerCount,
@@ -149,19 +139,19 @@ export default async function Home() {
     },
     {
       title: "Shipments",
-      href: "/customers",
+      href: "/shipments",
       value: shipmentCount.toLocaleString(),
       description: "Open shipment records from customer pages.",
     },
     {
       title: "Pricing",
-      href: "/customers",
+      href: "/pricing",
       value: awaitingPricing.toLocaleString(),
       description: "Review shipments waiting on pricing.",
     },
     {
       title: "Invoices",
-      href: "/customers",
+      href: "/invoices",
       value: sentOrAwaitingPaymentInvoices.toLocaleString(),
       description: "Open customer invoice workspaces.",
     },

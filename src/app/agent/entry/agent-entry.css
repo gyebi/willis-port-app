@@ -1,7 +1,10 @@
 
 .agentEntryPage {
   min-height: 100vh;
-  background: #f5f5f5;
+  background:
+    radial-gradient(circle at top left, rgba(245, 130, 32, 0.12), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(0, 0, 0, 0.08), transparent 30%),
+    #f5f5f5;
   padding: 32px 20px;
   color: #111;
 }
@@ -58,11 +61,187 @@
   border-bottom: 1px solid #e7e7e7;
 }
 
+.sectionHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
 .formSection h2 {
   margin: 0 0 20px;
   font-size: 18px;
   border-left: 5px solid #f58220;
   padding-left: 10px;
+}
+
+.sectionHeaderRow h2 {
+  margin-bottom: 8px;
+}
+
+.sectionDescription {
+  margin: 0;
+  color: #666;
+  font-weight: 500;
+}
+
+.ghostButton {
+  border: 1px solid #d4d4d4;
+  border-radius: 7px;
+  background: #fff;
+  color: #111;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ghostButton:hover {
+  border-color: #f58220;
+  color: #f58220;
+}
+
+.lookupSection {
+  position: relative;
+}
+
+.lookupField {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.lookupField input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  padding: 9px 11px;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-weight: 400;
+}
+
+.lookupField input:focus {
+  outline: 2px solid #f58220;
+  outline-offset: 1px;
+  border-color: #f58220;
+}
+
+.lookupDropdown {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  border: 1px solid #dcdcdc;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.lookupStatus {
+  padding: 14px 16px;
+  color: #666;
+  background: #fff;
+}
+
+.lookupStatusError {
+  color: #8a1c13;
+  background: #fff1f0;
+}
+
+.lookupOption {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 16px;
+  border: 0;
+  border-top: 1px solid #eee;
+  background: #fff;
+  color: #111;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lookupOption:first-child {
+  border-top: 0;
+}
+
+.lookupOption:hover,
+.lookupOptionActive {
+  background: #fff4e9;
+}
+
+.lookupOption strong {
+  font-size: 15px;
+}
+
+.lookupOption span {
+  color: #666;
+  font-size: 13px;
+}
+
+.lookupShipment {
+  color: #111 !important;
+  font-weight: 700;
+}
+
+.customerSummary {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid #ebd6c0;
+  border-radius: 12px;
+  background: #fff8f1;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.customerSummaryMuted {
+  background: #fafafa;
+  border-color: #e4e4e4;
+}
+
+.customerSummary strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.customerSummary p {
+  margin: 0;
+  color: #555;
+}
+
+.summaryEyebrow {
+  margin-bottom: 6px !important;
+  color: #f58220 !important;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.subsectionHeader {
+  margin: 10px 0 14px;
+  padding-top: 4px;
+  border-top: 1px solid #eee;
+}
+
+.subsectionHeader h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #111;
 }
 
 .formGrid {
@@ -81,7 +260,8 @@
 }
 
 .formGrid input,
-.formGrid select {
+.formGrid select,
+.formGrid textarea {
   width: 100%;
   box-sizing: border-box;
   min-height: 44px;
@@ -95,7 +275,8 @@
 }
 
 .formGrid input:focus,
-.formGrid select:focus {
+.formGrid select:focus,
+.formGrid textarea:focus {
   outline: 2px solid #f58220;
   outline-offset: 1px;
   border-color: #f58220;
@@ -104,6 +285,11 @@
 .formGrid input[readonly] {
   background: #f0f0f0;
   color: #666;
+}
+
+.formGrid textarea {
+  min-height: 84px;
+  resize: vertical;
 }
 
 .wideField {
@@ -183,5 +369,14 @@
   .wideField {
     grid-column: auto;
   }
-}
 
+  .sectionHeaderRow,
+  .customerSummary {
+    flex-direction: column;
+  }
+
+  .lookupDropdown {
+    position: static;
+    margin-top: 10px;
+  }
+}

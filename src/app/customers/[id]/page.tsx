@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireManagerUser } from "@/lib/auth/require-manager";
 
 import InvoiceReadyShipments from "./InvoiceReadyShipments";
 import styles from "./page.module.css";
@@ -16,6 +17,8 @@ type CustomerPageProps = {
 export default async function CustomerPage({
   params,
 }: CustomerPageProps) {
+  await requireManagerUser();
+
   const { id } = await params;
 
   const customer = await prisma.customer.findUnique({

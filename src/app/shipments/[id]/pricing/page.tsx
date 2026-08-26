@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import { requireManagerUser } from "@/lib/auth/require-manager";
 
 import PricingForm from "./PricingForm";
 import styles from "./page.module.css";
@@ -17,6 +18,8 @@ type PricingPageProps = {
 export default async function PricingPage({
   params,
 }: PricingPageProps) {
+  await requireManagerUser();
+
   const { id } = await params;
 
   const shipment = await prisma.shipment.findUnique({

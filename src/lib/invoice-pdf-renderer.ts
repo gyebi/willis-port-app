@@ -66,6 +66,10 @@ type ShipmentSource = {
   serviceType: "STANDARD" | "EXPRESS" | string;
   goodsCategory: "NORMAL" | "SPECIAL" | string;
   goodsType?: string | null;
+  dateReceived?: Date | string | null;
+  estimatedLoadingDate?: Date | string | null;
+  eta?: Date | string | null;
+  collectionDate?: Date | string | null;
   weightKg?: DecimalLike;
   chargeableWeightKg?: DecimalLike;
   declaredCbm?: DecimalLike;
@@ -109,6 +113,14 @@ type PreparedShipmentSection = {
   rightLines: string[];
 };
 
+type PreparedInvoiceTotals = {
+  handlingUsd: string;
+  documentationUsd: string;
+  specialHandlingUsd: string;
+  deliveryUsd: string;
+  otherUsd: string;
+};
+
 type PreparedInvoiceInput = {
   invoiceNumber: string;
   invoiceStatusLabel: string;
@@ -118,6 +130,7 @@ type PreparedInvoiceInput = {
   invoiceDetailLines: string[];
   shipments: PreparedShipmentSection[];
   chargeRows: PreparedChargeRow[];
+  totals: PreparedInvoiceTotals;
   subtotalUsd: string;
   exchangeRate: string;
   totalGhs: string;
@@ -180,6 +193,7 @@ export async function generateIssuedInvoicePdf(
   renderer.drawChargesTable(prepared.chargeRows);
   renderer.drawTotals(
     prepared.subtotalUsd,
+    prepared.totals,
     prepared.exchangeRate,
     prepared.totalGhs
   );
@@ -279,6 +293,24 @@ export function prepareInvoiceInput(
 
     if (shipment.container?.containerNumber) {
       leftLines.push(`Container: ${shipment.container.containerNumber}`);
+    }
+
+    if (shipment.dateReceived) {
+      leftLines.push(`Date Received: ${formatDate(shipment.dateReceived)}`);
+    }
+
+    if (shipment.estimatedLoadingDate) {
+      leftLines.push(
+        `Effective Loading Date: ${formatDate(shipment.estimatedLoadingDate)}`
+      );
+    }
+
+    if (shipment.eta) {
+      leftLines.push(`ETA / Arrival: ${formatDate(shipment.eta)}`);
+    }
+
+    if (shipment.collectionDate) {
+      leftLines.push(`Collection Date: ${formatDate(shipment.collectionDate)}`);
     }
 
     if (pricingBasis === "CBM") {
@@ -387,10 +419,18 @@ export function prepareInvoiceInput(
   const customerLines = buildCustomerLines(invoice.customer);
   const invoiceDetailLines = [
     `Invoice #: ${invoice.invoiceNumber}`,
-    `Date: ${formatDate(invoice.createdAt)}`,
+    `Invoice Date: ${formatDate(invoice.createdAt)}`,
     `Valid Until: ${formatDate(invoice.validUntil)}`,
     //`Status: ${formatEnumLabel(invoice.status)}`,
   ];
+
+  const totals: PreparedInvoiceTotals = {
+    handlingUsd: sumLineTotals(lines, "HANDLING"),
+    documentationUsd: sumLineTotals(lines, "DOCUMENTATION"),
+    specialHandlingUsd: sumLineTotals(lines, "SPECIAL_HANDLING"),
+    deliveryUsd: sumLineTotals(lines, "DELIVERY"),
+    otherUsd: sumLineTotals(lines, "OTHER"),
+  };
 
   return {
     invoiceNumber: invoice.invoiceNumber,
@@ -401,6 +441,7 @@ export function prepareInvoiceInput(
     invoiceDetailLines,
     shipments,
     chargeRows,
+    totals,
     subtotalUsd: formatMoney(invoice.subtotalUsd),
     exchangeRate: formatExchangeRate(invoice.exchangeRate),
     totalGhs: formatMoney(invoice.totalGhs),
@@ -523,6 +564,21 @@ function buildCustomerLines(customer: InvoiceSource["customer"]) {
   return lines;
 }
 
+function sumLineTotals(
+  lines: InvoiceLineSource[],
+  lineType: InvoiceLineType
+) {
+  const total = lines.reduce((sum, line) => {
+    if (line.lineType !== lineType) {
+      return sum;
+    }
+
+    return sum + toNumeric(line.lineTotalUsd);
+  }, 0);
+
+  return formatMoney(total);
+}
+
 function resolvePricingBasis(
   value: PricingBasis | string | null | undefined,
   shippingMode: ShipmentMode | null
@@ -630,6 +686,13 @@ function mergeShipment(
     serviceType: existing.serviceType ?? incoming.serviceType,
     goodsCategory: existing.goodsCategory ?? incoming.goodsCategory,
     goodsType: existing.goodsType ?? incoming.goodsType ?? null,
+    dateReceived: existing.dateReceived ?? incoming.dateReceived ?? null,
+    estimatedLoadingDate:
+      existing.estimatedLoadingDate ??
+      incoming.estimatedLoadingDate ??
+      null,
+    eta: existing.eta ?? incoming.eta ?? null,
+    collectionDate: existing.collectionDate ?? incoming.collectionDate ?? null,
     weightKg: existing.weightKg ?? incoming.weightKg ?? null,
     chargeableWeightKg:
       existing.chargeableWeightKg ?? incoming.chargeableWeightKg ?? null,
@@ -809,7 +872,7 @@ class InvoicePdfRenderer {
     invoiceDetailLines: string[]
   ) {
     this.ensureSpace(86);
-    this.page.drawText("Bill To", {
+    this.page.drawText("Customer Information", {
       x: PAGE_MARGIN,
       y: this.y,
       size: 11,
@@ -943,6 +1006,7 @@ class InvoicePdfRenderer {
 
   drawTotals(
     subtotalUsd: string,
+    totals: PreparedInvoiceTotals,
     exchangeRate: string,
     totalGhs: string
   ) {
@@ -950,6 +1014,15 @@ class InvoicePdfRenderer {
 
     const labelX = PAGE_MARGIN;
     const valueX = PAGE_WIDTH - PAGE_MARGIN;
+
+    this.page.drawText("Invoice Totals", {
+      x: labelX,
+      y: this.y,
+      size: 9.5,
+      font: this.boldFont,
+      color: TEXT,
+    });
+    this.y -= 13;
 
     this.page.drawText("Subtotal USD", {
       x: labelX,
@@ -967,6 +1040,32 @@ class InvoicePdfRenderer {
     });
     this.y -= 13;
 
+    const detailRows = [
+      { label: "Handling", value: totals.handlingUsd },
+      { label: "Documentation", value: totals.documentationUsd },
+      { label: "Special Handling", value: totals.specialHandlingUsd },
+      { label: "Delivery", value: totals.deliveryUsd },
+      { label: "Other approved charges", value: totals.otherUsd },
+    ].filter((row) => row.value !== "0.00");
+
+    for (const row of detailRows) {
+      this.page.drawText(row.label, {
+        x: labelX,
+        y: this.y,
+        size: 8.25,
+        font: this.regularFont,
+        color: TEXT,
+      });
+      this.page.drawText(`USD ${row.value}`, {
+        x: valueX - 120,
+        y: this.y,
+        size: 8.25,
+        font: this.boldFont,
+        color: TEXT,
+      });
+      this.y -= 12;
+    }
+
     this.page.drawText("Exchange Rate", {
       x: labelX,
       y: this.y,
@@ -982,6 +1081,22 @@ class InvoicePdfRenderer {
       color: TEXT,
     });
     this.y -= 14;
+
+    this.page.drawText("Total USD", {
+      x: labelX,
+      y: this.y,
+      size: 8.5,
+      font: this.regularFont,
+      color: TEXT,
+    });
+    this.page.drawText(`USD ${subtotalUsd}`, {
+      x: valueX - 120,
+      y: this.y,
+      size: 8.5,
+      font: this.boldFont,
+      color: TEXT,
+    });
+    this.y -= 13;
 
     const barHeight = 24;
     this.page.drawRectangle({

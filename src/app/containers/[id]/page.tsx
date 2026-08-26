@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireManagerUser } from "@/lib/auth/require-manager";
 
 import styles from "./page.module.css";
 
@@ -15,6 +16,8 @@ type ContainerPageProps = {
 export default async function ContainerPage({
   params,
 }: ContainerPageProps) {
+  await requireManagerUser();
+
   const { id } = await params;
 
   const container = await prisma.container.findUnique({

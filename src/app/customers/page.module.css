@@ -43,6 +43,80 @@
   color: #666666;
 }
 
+.searchSection {
+  margin-bottom: 22px;
+}
+
+.searchForm {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-end;
+  padding: 18px 20px;
+  border: 1px solid #e8d8c8;
+  border-radius: 14px;
+  background: #fffaf4;
+}
+
+.searchLabel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  color: #7a5a40;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.searchInput {
+  width: 100%;
+  min-width: 260px;
+  padding: 12px 14px;
+  border: 1px solid #dfc7b2;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #111111;
+  font: inherit;
+}
+
+.searchInput:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 1px;
+  border-color: #f97316;
+}
+
+.searchActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.searchButton {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: #f97316;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.searchButton:hover {
+  background: #ea580c;
+}
+
+.clearLink {
+  color: #7a5a40;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.clearLink:hover {
+  color: #f97316;
+}
+
 .customerList {
   display: flex;
   flex-direction: column;
@@ -79,6 +153,15 @@
   color: #666666;
 }
 
+.customerMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  color: #7a5a40;
+  font-size: 12px;
+}
+
 .shipmentCount {
   display: flex;
   flex-direction: column;
@@ -113,6 +196,19 @@
 }
 
 @media (max-width: 700px) {
+  .searchForm {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchInput {
+    min-width: 0;
+  }
+
+  .searchActions {
+    justify-content: space-between;
+  }
+
   .customerCard {
     align-items: flex-start;
     flex-direction: column;
