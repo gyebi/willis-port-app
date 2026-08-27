@@ -301,7 +301,7 @@ model Customer {
 model Container {
   id String @id @default(cuid())
 
-  containerNumber String @unique
+  containerNumber String 
 
   shippingMode ShippingMode
 

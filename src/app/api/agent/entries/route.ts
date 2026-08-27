@@ -246,9 +246,11 @@ export async function POST(request: Request) {
       let containerId: string | null = null;
 
       if (containerNumber) {
-        const existingContainer = await tx.container.findUnique({
+        const existingContainer = await tx.container.findFirst({
           where: {
             containerNumber,
+            shippingMode:
+              shippingMode as "SEA" | "AIR" | "UNKNOWN",
           },
         });
 
@@ -303,14 +305,14 @@ export async function POST(request: Request) {
           collectionDate: schedule.collectionDate,
           status:
             status as
-              | "RECEIVED"
-              | "ORIGIN"
-              | "LOADING_SCHEDULED"
-              | "IN_TRANSIT"
-              | "CUSTOMS_CLEARANCE"
-              | "WAREHOUSE"
-              | "DELIVERED"
-          | "CANCELLED",
+            | "RECEIVED"
+            | "ORIGIN"
+            | "LOADING_SCHEDULED"
+            | "IN_TRANSIT"
+            | "CUSTOMS_CLEARANCE"
+            | "WAREHOUSE"
+            | "DELIVERED"
+            | "CANCELLED",
           containerId,
           enteredByUserId: user.id,
         },
